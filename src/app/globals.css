@@ -1,8 +1,52 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #05050d;
+  --foreground: #f4f4f5;
+}
+
+/* Luxury ultra-thin scrollbar (almost invisible until interaction) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.55) rgba(255, 255, 255, 0.04);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.32);
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.6);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .melodic-fade-up {
+    animation: melodicFadeUp 520ms ease both;
+  }
+}
+
+@keyframes melodicFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @theme inline {
@@ -12,15 +56,43 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: #05050d;
+  color: #f4f4f5;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+html {
+  --background: #05050d;
+  --foreground: #f4f4f5;
+}
+
+*::selection {
+  background: rgba(139, 92, 246, 0.35);
+  color: #fff;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.35);
+  color: #fff;
+}
+
+:root {
+  --background: #05050d;
+  --foreground: #f4f4f5;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.35);
+  color: #fff;
+}
+
+:root {
+  --background: #05050d;
+  --foreground: #f4f4f5;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.35);
+  color: #fff;
 }
