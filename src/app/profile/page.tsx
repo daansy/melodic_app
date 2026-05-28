@@ -29,6 +29,19 @@ export default async function ProfilePage() {
   const avatarInitial =
     displayName?.[0]?.toUpperCase() || username?.[0]?.toUpperCase() || "M";
 
+  const albumRankings = 0;
+  const trackRankings = 0;
+  const totalRankings = albumRankings + trackRankings;
+  const points = 0;
+  const badges = 0;
+
+  const stats = [
+    { label: "Albums", value: albumRankings.toLocaleString() },
+    { label: "Tracks", value: trackRankings.toLocaleString() },
+    { label: "Points", value: points.toLocaleString() },
+    { label: "Badges", value: badges.toLocaleString() },
+  ];
+
   return (
     <main className="min-h-screen bg-[#05050d] text-white">
       <div
@@ -48,16 +61,16 @@ export default async function ProfilePage() {
           ← Back to Home
         </Link>
 
-        <section className="mt-10 overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-2xl">
-          <div className="relative h-40 overflow-hidden bg-gradient-to-r from-violet-700/40 via-fuchsia-600/20 to-indigo-600/30">
+        <section className="mt-8 overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-2xl">
+          <div className="relative h-32 overflow-hidden bg-gradient-to-r from-violet-700/40 via-fuchsia-600/20 to-indigo-600/30 md:h-36">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18),transparent_25%),radial-gradient(circle_at_75%_10%,rgba(168,85,247,0.28),transparent_28%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0b0b14] to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0b0b14] to-transparent" />
           </div>
 
-          <div className="px-6 pb-8 md:px-8">
-            <div className="-mt-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-              <div className="flex items-end gap-5">
-                <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[#080810] text-4xl font-semibold text-white/45 ring-4 ring-[#0b0b14]">
+          <div className="px-5 pb-6 md:px-7 md:pb-7">
+            <div className="-mt-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+              <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:gap-5">
+                <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[#080810] text-4xl font-semibold text-white/45 ring-4 ring-[#0b0b14] md:h-28 md:w-28">
                   {profile.avatar_url ? (
                     <img
                       src={profile.avatar_url}
@@ -69,47 +82,60 @@ export default async function ProfilePage() {
                   )}
                 </div>
 
-                <div className="pb-2">
-                  <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                <div className="min-w-0 pb-1">
+                  <h1 className="max-w-full break-words text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
                     {displayName}
                   </h1>
-                  <p className="mt-1 text-sm text-white/45">@{username}</p>
+                  <p className="mt-1 break-words text-sm text-white/45">
+                    @{username}
+                  </p>
                 </div>
               </div>
 
               <Link
                 href="/settings"
-                className="rounded-full border border-white/10 bg-white/[0.04] px-5 py-2 text-sm font-medium text-white/80 transition hover:bg-white/[0.08] hover:text-white"
+                className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-5 py-2 text-sm font-medium text-white/80 transition hover:bg-white/[0.08] hover:text-white"
               >
                 Edit profile
               </Link>
             </div>
 
-            <div className="mt-7 max-w-2xl">
+            <div className="mt-5 max-w-2xl">
               <p className="text-sm leading-relaxed text-white/60">
                 {profile.bio || "No bio yet."}
               </p>
             </div>
 
-            <dl className="mt-8 grid grid-cols-1 gap-3 border-t border-white/[0.06] pt-6 sm:grid-cols-3">
-              {[
-                { label: "Albums rated", value: "0" },
-                { label: "Reviews", value: "0" },
-                { label: "Lists", value: "0" },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-2xl border border-white/[0.06] bg-black/20 p-5 text-center"
-                >
-                  <dt className="text-[10px] uppercase tracking-wider text-white/35">
-                    {stat.label}
-                  </dt>
-                  <dd className="mt-2 text-2xl font-semibold tabular-nums text-white">
-                    {stat.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <div className="mt-6 border-t border-white/[0.06] pt-5">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-white/35">
+                  Profile progress
+                </p>
+
+                <p className="text-xs text-white/40">
+                  Total rankings{" "}
+                  <span className="font-semibold text-white/75">
+                    {totalRankings.toLocaleString()}
+                  </span>
+                </p>
+              </div>
+
+              <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                {stats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="rounded-2xl border border-white/[0.06] bg-black/20 px-4 py-3 text-center"
+                  >
+                    <dt className="text-[10px] uppercase tracking-wider text-white/35">
+                      {stat.label}
+                    </dt>
+                    <dd className="mt-1 text-xl font-semibold tabular-nums text-white">
+                      {stat.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
         </section>
 
@@ -120,7 +146,7 @@ export default async function ProfilePage() {
                 Recent activity
               </h2>
               <p className="mt-1 text-sm text-white/45">
-                Your ratings and reviews will appear here later.
+                Your album and track rankings will appear here later.
               </p>
             </div>
 
@@ -129,8 +155,8 @@ export default async function ProfilePage() {
                 No activity yet
               </p>
               <p className="mt-2 text-sm text-white/40">
-                Once album ratings are added, this page will start showing your
-                music taste.
+                Once rankings are added, this page will start showing your music
+                taste.
               </p>
             </div>
           </div>
@@ -145,8 +171,8 @@ export default async function ProfilePage() {
             </h2>
 
             <p className="mt-3 text-sm leading-relaxed text-white/50">
-              After you rate albums, Melodic can turn your activity into taste
-              stats, favorite genres, top artists and rating patterns.
+              After you rank albums and tracks, Melodic can turn your activity
+              into taste stats, favorite genres, top artists and rating patterns.
             </p>
 
             <div className="mt-6 space-y-3">

@@ -7,6 +7,138 @@ import { useRouter } from "next/navigation";
 
 const MAX_AVATAR_SIZE = 1024 * 1024; // 1MB
 const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const BLOCKED_USERNAME_WORDS = [
+  // Platform / impersonation
+  "admin",
+  "administrator",
+  "moderator",
+  "support",
+  "staff",
+  "official",
+  "verified",
+  "melodic",
+  "system",
+  "root",
+  "owner",
+  "founder",
+  "ceo",
+  "helpdesk",
+  "security",
+
+  // Strong English profanity
+  "fuck",
+  "fucker",
+  "fucking",
+  "shit",
+  "bitch",
+  "cunt",
+  "asshole",
+  "dick",
+  "cock",
+  "pussy",
+
+  // Sexual / explicit
+  "porn",
+  "porno",
+  "pornhub",
+  "xxx",
+  "nsfw",
+  "nude",
+  "nudes",
+  "boobs",
+  "tits",
+  "cum",
+  "jizz",
+  "sperm",
+  "anal",
+  "hentai",
+  "onlyfans",
+
+  // Hate speech / slurs
+  "nigger",
+  "nigga",
+  "faggot",
+  "tranny",
+  "chink",
+  "spic",
+  "kike",
+  "coon",
+  "gook",
+  "wetback",
+  "raghead",
+
+  // Violence / extremist
+  "killyourself",
+  "killurself",
+  "kys",
+  "kms",
+  "rape",
+  "rapist",
+  "terrorist",
+  "terror",
+  "nazi",
+  "hitler",
+  "isis",
+  "kkk",
+
+  // Dutch harder profanity
+  "kanker",
+  "tyfus",
+  "tering",
+  "neuk",
+  "neuken",
+];
+
+function normalizeUsernameForFilter(username: string) {
+  return username
+    .toLowerCase()
+    .replaceAll("1", "i")
+    .replaceAll("!", "i")
+    .replaceAll("|", "i")
+    .replaceAll("3", "e")
+    .replaceAll("4", "a")
+    .replaceAll("@", "a")
+    .replaceAll("0", "o")
+    .replaceAll("5", "s")
+    .replaceAll("$", "s")
+    .replaceAll("7", "t")
+    .replaceAll("9", "g")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function getUsernameError(username: string) {
+  if (username.length < 4) {
+    return "Username must be at least 4 characters.";
+  }
+
+  if (username.length > 20) {
+    return "Username must be 20 characters or less.";
+  }
+
+  if (!/^[a-z0-9_]+$/.test(username)) {
+    return "Username can only contain lowercase letters, numbers and underscores.";
+  }
+
+  if (username.startsWith("_") || username.endsWith("_")) {
+    return "Username cannot start or end with an underscore.";
+  }
+
+  if (username.includes("__")) {
+    return "Username cannot contain multiple underscores in a row.";
+  }
+
+  const normalizedUsername = normalizeUsernameForFilter(username);
+
+  const blockedWord = BLOCKED_USERNAME_WORDS.find((word) =>
+    normalizedUsername.includes(word)
+  );
+
+  if (blockedWord) {
+    return "This username is not allowed.";
+  }
+
+  return "";
+}
 
 export function OnboardingForm({
   userId,
@@ -92,10 +224,12 @@ export function OnboardingForm({
 
     const cleanDisplayName = displayName.trim().slice(0, 32);
 
-    if (cleanUsername.length < 4) {
-      setError("Username must be at least 4 characters.");
-      return;
-    }
+    const usernameError = getUsernameError(cleanUsername);
+
+if (usernameError) {
+  setError(usernameError);
+  return;
+}
 
     setLoading(true);
 
