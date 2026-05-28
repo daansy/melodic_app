@@ -75,6 +75,11 @@ export function OnboardingForm({
     setAvatarFile(file);
     setAvatarPreview(previewUrl);
   }
+  function removeSelectedAvatar() {
+    setError("");
+    setAvatarFile(null);
+    setAvatarPreview("");
+  }
 
   async function saveBasicInfo() {
     setError("");
@@ -422,14 +427,24 @@ export function OnboardingForm({
                 </label>
 
                 {avatarFile ? (
-                  <p className="mt-3 max-w-full truncate text-xs text-white/35">
-                    {avatarFile.name}
-                  </p>
-                ) : (
-                  <p className="mt-3 text-xs text-white/35">
-                    JPG, PNG or WebP only. Max 1MB.
-                  </p>
-                )}
+  <div className="mt-3 flex max-w-full flex-col items-center gap-3">
+    <p className="max-w-full truncate text-xs text-white/35">
+      {avatarFile.name}
+    </p>
+
+    <button
+      type="button"
+      onClick={removeSelectedAvatar}
+      className="text-xs font-medium text-white/40 transition hover:text-red-200"
+    >
+      Remove selected image
+    </button>
+  </div>
+) : (
+  <p className="mt-3 text-xs text-white/35">
+    JPG, PNG or WebP only. Max 1MB.
+  </p>
+)}
               </div>
 
               {error ? (
