@@ -61,6 +61,7 @@ export function HomePage({ user }: { user: User }) {
                   onSearchChange={setSearchQuery}
                   onRateAlbum={() => showToast("Album rating flow coming soon")}
                   onNotify={() => showToast("Notifications")}
+                  userName={displayName.split(" ")[0]}
                 />
               </div>
             </div>
