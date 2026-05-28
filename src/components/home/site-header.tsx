@@ -8,18 +8,20 @@ export function SiteHeader({
   onSearchChange,
   onRateAlbum,
   onNotify,
+  userName,
 }: {
   searchQuery: string;
   onSearchChange: (v: string) => void;
   onRateAlbum: () => void;
   onNotify: () => void;
+  userName: string;
 }) {
   return (
     <header className="mb-10 space-y-6 lg:mb-12">
       <div className="flex flex-wrap items-start justify-between gap-6">
         <div className="max-w-2xl">
           <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-violet-300/80">
-            Welcome back
+            Welcome back, {userName}
           </p>
           <h1 className="mt-2 font-sans text-3xl font-semibold tracking-tight text-white md:text-[2rem] md:leading-tight">
             Rate albums with intention.

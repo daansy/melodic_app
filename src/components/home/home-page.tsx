@@ -9,6 +9,7 @@ import { FeaturedReviews } from "./featured-reviews";
 import { BrowseGenres } from "./browse-genres";
 import { RightRail } from "./right-rail";
 import { MusicPlayer } from "./music-player";
+import type { User } from "@supabase/supabase-js";
 import {
   featuredReviews,
   genres,
@@ -18,7 +19,12 @@ import {
 } from "@/lib/data";
 import type { Album, Genre } from "@/lib/types";
 
-export function HomePage() {
+export function HomePage({ user }: { user: User }) {
+  const displayName =
+  user.user_metadata.full_name ||
+  user.user_metadata.name ||
+  user.email ||
+  "there";
   const [searchQuery, setSearchQuery] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [playerSaved, setPlayerSaved] = useState(false);
