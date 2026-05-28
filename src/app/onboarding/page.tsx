@@ -13,5 +13,11 @@ export default async function OnboardingPage() {
     redirect("/login");
   }
 
-  return <OnboardingForm userId={user.id} email={user.email ?? ""} />;
+  return (
+    <OnboardingForm
+      userId={user.id}
+      email={user.email ?? ""}
+      fullName={user.user_metadata.full_name ?? ""}
+    />
+  );
 }
