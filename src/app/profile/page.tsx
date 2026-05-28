@@ -3,9 +3,37 @@ import Image from "next/image";
 import { RatingBadge } from "@/components/ui/rating-badge";
 import { profileStats, yourRecentRatings } from "@/lib/data";
 import { albumSlug } from "@/lib/slug";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
-export default function ProfilePage() {
-  const p = profileStats;
+export default async function ProfilePage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+  const p = {
+    name:
+      user.user_metadata.full_name ||
+      user.user_metadata.name ||
+      "Melodic User",
+  
+    handle: `@${user.email?.split("@")[0] || "user"}`,
+  
+    avatarUrl:
+      user.user_metadata.avatar_url ||
+      user.user_metadata.picture ||
+      "https://placehold.co/200x200",
+  
+    avgRating: 8.7,
+    totalRatings: 0,
+    totalReviews: 0,
+    following: 0,
+  };
 
   return (
     <main className="min-h-screen bg-[#05050d] text-white">
