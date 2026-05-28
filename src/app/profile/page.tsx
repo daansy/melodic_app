@@ -33,14 +33,20 @@ export default async function ProfilePage() {
   const trackRankings = 0;
   const totalRankings = albumRankings + trackRankings;
   const points = 0;
-  const badges = 0;
 
   const stats = [
     { label: "Albums", value: albumRankings.toLocaleString() },
     { label: "Tracks", value: trackRankings.toLocaleString() },
     { label: "Points", value: points.toLocaleString() },
-    { label: "Badges", value: badges.toLocaleString() },
   ];
+
+  const badgePreview = [
+    { name: "First Ranker", unlocked: false },
+    { name: "Tastemaker", unlocked: false },
+    { name: "Early Listener", unlocked: false },
+  ];
+
+  const unlockedBadges = badgePreview.filter((badge) => badge.unlocked).length;
 
   return (
     <main className="min-h-screen bg-[#05050d] text-white">
@@ -120,21 +126,63 @@ export default async function ProfilePage() {
                 </p>
               </div>
 
-              <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                {stats.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="rounded-2xl border border-white/[0.06] bg-black/20 px-4 py-3 text-center"
-                  >
-                    <dt className="text-[10px] uppercase tracking-wider text-white/35">
-                      {stat.label}
-                    </dt>
-                    <dd className="mt-1 text-xl font-semibold tabular-nums text-white">
-                      {stat.value}
-                    </dd>
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
+                <dl className="grid grid-cols-3 gap-3">
+                  {stats.map((stat) => (
+                    <div
+                      key={stat.label}
+                      className="rounded-2xl border border-white/[0.06] bg-black/20 px-4 py-3 text-center"
+                    >
+                      <dt className="text-[10px] uppercase tracking-wider text-white/35">
+                        {stat.label}
+                      </dt>
+                      <dd className="mt-1 text-xl font-semibold tabular-nums text-white">
+                        {stat.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+
+                <Link
+                  href="/profile/badges"
+                  className="group rounded-2xl border border-white/[0.06] bg-black/20 px-4 py-3 transition hover:border-violet-400/30 hover:bg-violet-500/[0.06]"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-white/35">
+                        Badges
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-white">
+                        {unlockedBadges} unlocked
+                      </p>
+                    </div>
+
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-white/45 transition group-hover:border-violet-400/30 group-hover:text-violet-200">
+                      View
+                    </span>
                   </div>
-                ))}
-              </dl>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {badgePreview.map((badge) => (
+                      <span
+                        key={badge.name}
+                        className={
+                          badge.unlocked
+                            ? "rounded-full border border-violet-300/30 bg-violet-500/15 px-2.5 py-1 text-xs text-violet-100"
+                            : "rounded-full border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-xs text-white/30"
+                        }
+                      >
+                        {badge.name}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="mt-3 text-xs leading-relaxed text-white/35">
+                    Unlock badges by ranking music, writing reviews and building
+                    your taste profile.
+                  </p>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
