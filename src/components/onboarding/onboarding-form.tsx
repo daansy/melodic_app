@@ -92,8 +92,8 @@ export function OnboardingForm({
 
     const cleanDisplayName = displayName.trim().slice(0, 32);
 
-    if (cleanUsername.length < 3) {
-      setError("Username must be at least 3 characters.");
+    if (cleanUsername.length < 4) {
+      setError("Username must be at least 4 characters.");
       return;
     }
 
