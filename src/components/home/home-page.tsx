@@ -9,7 +9,6 @@ import { FeaturedReviews } from "./featured-reviews";
 import { BrowseGenres } from "./browse-genres";
 import { RightRail } from "./right-rail";
 import { MusicPlayer } from "./music-player";
-import type { User } from "@supabase/supabase-js";
 import {
   featuredReviews,
   genres,
@@ -19,12 +18,17 @@ import {
 } from "@/lib/data";
 import type { Album, Genre } from "@/lib/types";
 
-export function HomePage({ user }: { user: User }) {
-  const displayName =
-  user.user_metadata.full_name ||
-  user.user_metadata.name ||
-  user.email ||
-  "there";
+type HomeProfile = {
+  username: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  onboarding_completed: boolean | null;
+};
+
+export function HomePage({ profile }: { profile: HomeProfile }) {
+  const displayName = profile.display_name || profile.username || "there";
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [playerSaved, setPlayerSaved] = useState(false);
@@ -68,7 +72,7 @@ export function HomePage({ user }: { user: User }) {
 
             <div className="grid grid-cols-1 gap-16 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-16 2xl:grid-cols-[minmax(0,1fr)_360px]">
               <div className="space-y-16 lg:space-y-20">
-                <div className="melodic-fade-up relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.02] p-6 backdrop-blur-xl shadow-[0_28px_90px_-65px_rgba(168,85,247,0.5)]">
+                <div className="melodic-fade-up relative overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.02] p-6 shadow-[0_28px_90px_-65px_rgba(168,85,247,0.5)] backdrop-blur-xl">
                   <div
                     aria-hidden="true"
                     className="absolute inset-0 opacity-80"
@@ -86,11 +90,12 @@ export function HomePage({ user }: { user: User }) {
                         Tonight’s thread: late-night clarity.
                       </h2>
                       <p className="mt-3 text-sm leading-relaxed text-white/55">
-                        Melodic’s reviewers are rewarding sequencing,
-                        texture, and restraint. If it’s glossy without
-                        feeling loud, it’s in.
+                        Melodic’s reviewers are rewarding sequencing, texture,
+                        and restraint. If it’s glossy without feeling loud, it’s
+                        in.
                       </p>
                     </div>
+
                     <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-r from-violet-500/15 to-fuchsia-500/10 p-4">
                       <p className="text-[11px] font-medium uppercase tracking-wider text-violet-200/70">
                         Community momentum
@@ -108,9 +113,12 @@ export function HomePage({ user }: { user: User }) {
                 <TrendingAlbums
                   albums={trendingAlbums}
                   onSelect={(album: Album) =>
-                    showToast(`Opening ${album.title} — avg ${album.avgRating}/10`)
+                    showToast(
+                      `Opening ${album.title} — avg ${album.avgRating}/10`
+                    )
                   }
                 />
+
                 <FeaturedReviews
                   reviews={featuredReviews}
                   helpful={helpful}
@@ -118,16 +126,20 @@ export function HomePage({ user }: { user: User }) {
                     setHelpful((prev) => ({ ...prev, [id]: !prev[id] }))
                   }
                 />
+
                 <BrowseGenres
                   genres={genres}
                   onSelect={(genre: Genre) =>
-                    showToast(`${genre.name} — community avg ${genre.avgScore}/10`)
+                    showToast(
+                      `${genre.name} — community avg ${genre.avgScore}/10`
+                    )
                   }
                 />
               </div>
 
               <RightRail
                 activity={networkActivity}
+                profile={profile}
                 onEditProfile={() => showToast("Profile editor coming soon")}
               />
             </div>

@@ -12,14 +12,16 @@ export default async function Home() {
   if (!user) {
     redirect("/login");
   }
-    const { data: profile } = await supabase
+
+  const { data: profile } = await supabase
     .from("profiles")
-    .select("username, onboarding_completed")
+    .select("username, display_name, avatar_url, bio, onboarding_completed")
     .eq("id", user.id)
     .single();
-  
+
   if (!profile?.username || !profile?.onboarding_completed) {
     redirect("/onboarding");
   }
-  return <HomePage user={user} />;
+
+  return <HomePage profile={profile} />;
 }
