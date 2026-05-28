@@ -215,8 +215,8 @@ export function SettingsForm({
           </h1>
 
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/50">
-            Edit your public Melodic profile now. Account, privacy and
-            notification settings can live here later.
+            Edit your public profile. Account, privacy and notification settings
+            can live here later.
           </p>
         </div>
 
@@ -251,14 +251,14 @@ export function SettingsForm({
 
           <form onSubmit={handleSave} className="space-y-6">
             <section className="overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-2xl">
-              <div className="relative h-28 bg-gradient-to-r from-violet-700/35 via-fuchsia-600/20 to-indigo-600/30">
+              <div className="relative h-24 bg-gradient-to-r from-violet-700/35 via-fuchsia-600/20 to-indigo-600/30 md:h-28">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.16),transparent_25%),radial-gradient(circle_at_75%_10%,rgba(168,85,247,0.28),transparent_28%)]" />
                 <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0b0b14] to-transparent" />
               </div>
 
               <div className="px-6 pb-6 md:px-8">
-                <div className="-mt-12 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                  <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end">
+                <div className="-mt-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:gap-5">
                     <button
                       type="button"
                       onClick={openFilePicker}
@@ -291,14 +291,18 @@ export function SettingsForm({
                     />
 
                     <div className="min-w-0 pb-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="break-words text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <h2 className="max-w-full break-words text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
                           {displayName || username}
                         </h2>
 
-                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-white/35">
-                          No badge
-                        </span>
+                        <button
+                          type="button"
+                          disabled
+                          className="shrink-0 cursor-not-allowed rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-white/35"
+                        >
+                          Choose badge
+                        </button>
                       </div>
 
                       <p className="mt-1 break-words text-sm text-white/45">
@@ -372,6 +376,9 @@ export function SettingsForm({
                     disabled
                     className="mt-2 w-full cursor-not-allowed rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white/35 outline-none"
                   />
+                  <p className="mt-2 text-xs text-white/35">
+                    Your username is permanent and cannot be changed.
+                  </p>
                 </div>
 
                 <div>
@@ -407,66 +414,6 @@ export function SettingsForm({
                     {bio.length}/160
                   </p>
                 </div>
-              </div>
-            </section>
-
-            <section className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-6 md:p-8">
-              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-violet-300/80">
-                Profile extras
-              </p>
-
-              <h2 className="mt-3 text-xl font-semibold tracking-tight">
-                Customize your identity
-              </h2>
-
-              <p className="mt-2 text-sm leading-relaxed text-white/45">
-                These are future profile features. They are shown here already
-                so the settings page feels like it can grow naturally.
-              </p>
-
-              <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2">
-                {[
-                  {
-                    title: "Featured badge",
-                    description:
-                      "Choose a badge to show next to your display name.",
-                  },
-                  {
-                    title: "Profile theme",
-                    description:
-                      "Pick a subtle color style for your profile header.",
-                  },
-                  {
-                    title: "Pinned review",
-                    description:
-                      "Highlight one favorite review on your profile.",
-                  },
-                  {
-                    title: "Public taste stats",
-                    description:
-                      "Choose which stats are visible to other users.",
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.title}
-                    className="rounded-2xl border border-white/[0.06] bg-black/20 p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-sm font-semibold text-white/85">
-                          {item.title}
-                        </h3>
-                        <p className="mt-2 text-sm leading-relaxed text-white/40">
-                          {item.description}
-                        </p>
-                      </div>
-
-                      <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-white/30">
-                        Soon
-                      </span>
-                    </div>
-                  </div>
-                ))}
               </div>
             </section>
 
