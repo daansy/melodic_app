@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -26,6 +26,7 @@ export function SettingsForm({
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const username = profile.username || "user";
   const initialDisplayName = profile.display_name || profile.username || "";
@@ -48,6 +49,10 @@ export function SettingsForm({
     displayName?.[0]?.toUpperCase() || username?.[0]?.toUpperCase() || "M";
 
   const visibleAvatarUrl = avatarPreview || currentAvatarUrl;
+
+  function openFilePicker() {
+    fileInputRef.current?.click();
+  }
 
   function handleAvatarChange(file: File | null) {
     setError("");
@@ -192,7 +197,7 @@ export function SettingsForm({
         }}
       />
 
-      <div className="mx-auto w-full max-w-3xl">
+      <div className="mx-auto w-full max-w-[1180px]">
         <Link
           href="/profile"
           className="text-sm font-medium text-white/60 transition hover:text-white"
@@ -200,57 +205,118 @@ export function SettingsForm({
           ← Back to profile
         </Link>
 
-        <section className="mt-8 rounded-3xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-2xl md:p-8">
+        <div className="mt-8">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-violet-300/80">
-            Profile settings
+            Settings
           </p>
 
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">
-            Edit your profile
+            Manage your account
           </h1>
 
-          <p className="mt-3 text-sm leading-relaxed text-white/50">
-            Change how your Melodic profile appears to other users.
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/50">
+            Edit your public Melodic profile now. Account, privacy and
+            notification settings can live here later.
           </p>
+        </div>
 
-          <form onSubmit={handleSave} className="mt-8 space-y-7">
-            <div className="rounded-2xl border border-white/[0.08] bg-black/20 p-5">
-              <label className="text-sm font-medium text-white/75">
-                Profile picture
-              </label>
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="h-fit rounded-3xl border border-white/[0.08] bg-white/[0.03] p-3">
+            {[
+              { label: "Profile", active: true },
+              { label: "Account", active: false },
+              { label: "Privacy", active: false },
+              { label: "Notifications", active: false },
+              { label: "Connected accounts", active: false },
+            ].map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                disabled={!item.active}
+                className={
+                  item.active
+                    ? "flex w-full items-center justify-between rounded-2xl bg-violet-500/15 px-4 py-3 text-left text-sm font-medium text-violet-100"
+                    : "flex w-full cursor-not-allowed items-center justify-between rounded-2xl px-4 py-3 text-left text-sm font-medium text-white/35"
+                }
+              >
+                <span>{item.label}</span>
+                {!item.active ? (
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-white/25">
+                    Soon
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </aside>
 
-              <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-center">
-                <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[#080810] text-4xl font-semibold text-white/45">
-                  {visibleAvatarUrl ? (
-                    <img
-                      src={visibleAvatarUrl}
-                      alt="Profile preview"
-                      className="h-full w-full object-cover"
+          <form onSubmit={handleSave} className="space-y-6">
+            <section className="overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-2xl">
+              <div className="relative h-28 bg-gradient-to-r from-violet-700/35 via-fuchsia-600/20 to-indigo-600/30">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.16),transparent_25%),radial-gradient(circle_at_75%_10%,rgba(168,85,247,0.28),transparent_28%)]" />
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0b0b14] to-transparent" />
+              </div>
+
+              <div className="px-6 pb-6 md:px-8">
+                <div className="-mt-12 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end">
+                    <button
+                      type="button"
+                      onClick={openFilePicker}
+                      className="group relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[#080810] text-4xl font-semibold text-white/45 ring-4 ring-[#0b0b14]"
+                      aria-label="Change profile picture"
+                    >
+                      {visibleAvatarUrl ? (
+                        <img
+                          src={visibleAvatarUrl}
+                          alt="Profile preview"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        avatarInitial
+                      )}
+
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-xs font-semibold text-white opacity-0 transition group-hover:opacity-100">
+                        Change photo
+                      </div>
+                    </button>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleAvatarChange(e.target.files?.[0] ?? null)
+                      }
                     />
-                  ) : (
-                    avatarInitial
-                  )}
-                </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap gap-3">
-                    <label className="cursor-pointer rounded-full border border-white/10 bg-white/[0.04] px-5 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white">
-                      Choose image
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        className="hidden"
-                        onChange={(e) =>
-                          handleAvatarChange(e.target.files?.[0] ?? null)
-                        }
-                      />
-                    </label>
+                    <div className="min-w-0 pb-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="break-words text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+                          {displayName || username}
+                        </h2>
 
+                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-white/35">
+                          No badge
+                        </span>
+                      </div>
+
+                      <p className="mt-1 break-words text-sm text-white/45">
+                        @{username}
+                      </p>
+
+                      <p className="mt-2 text-xs text-white/30">
+                        Your username is permanent and cannot be changed.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
                     {avatarFile ? (
                       <button
                         type="button"
                         onClick={removeSelectedAvatar}
-                        className="rounded-full border border-white/10 bg-white/[0.02] px-5 py-2 text-sm font-medium text-white/45 transition hover:border-red-300/30 hover:text-red-200"
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-medium text-white/45 transition hover:border-red-300/30 hover:text-red-200"
                       >
                         Remove selected
                       </button>
@@ -260,69 +326,149 @@ export function SettingsForm({
                       <button
                         type="button"
                         onClick={removeCurrentAvatar}
-                        className="rounded-full border border-white/10 bg-white/[0.02] px-5 py-2 text-sm font-medium text-white/45 transition hover:border-red-300/30 hover:text-red-200"
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-medium text-white/45 transition hover:border-red-300/30 hover:text-red-200"
                       >
                         Remove photo
                       </button>
                     ) : null}
                   </div>
+                </div>
 
-                  <p className="mt-3 text-xs leading-relaxed text-white/35">
-                    JPG, PNG or WebP only. Max 1MB.
+                <p className="mt-5 text-xs leading-relaxed text-white/35">
+                  JPG, PNG or WebP only. Max 1MB. Hover over your avatar to
+                  change it.
+                </p>
+
+                {avatarFile ? (
+                  <p className="mt-2 max-w-full truncate text-xs text-white/35">
+                    Selected: {avatarFile.name}
                   </p>
+                ) : null}
+              </div>
+            </section>
 
-                  {avatarFile ? (
-                    <p className="mt-2 max-w-full truncate text-xs text-white/35">
-                      Selected: {avatarFile.name}
-                    </p>
-                  ) : null}
+            <section className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-6 md:p-8">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-violet-300/80">
+                  Public profile
+                </p>
+
+                <h2 className="mt-3 text-xl font-semibold tracking-tight">
+                  Profile details
+                </h2>
+
+                <p className="mt-2 text-sm leading-relaxed text-white/45">
+                  These details are shown on your public Melodic profile.
+                </p>
+              </div>
+
+              <div className="mt-7 space-y-6">
+                <div>
+                  <label className="text-sm font-medium text-white/75">
+                    Username
+                  </label>
+                  <input
+                    value={`@${username}`}
+                    disabled
+                    className="mt-2 w-full cursor-not-allowed rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white/35 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-white/75">
+                    Display name
+                  </label>
+                  <input
+                    maxLength={32}
+                    value={displayName}
+                    onChange={(e) =>
+                      setDisplayName(e.target.value.slice(0, 32))
+                    }
+                    className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/35 outline-none transition focus:border-violet-400/40"
+                  />
+                  <p className="mt-2 text-right text-xs tabular-nums text-white/35">
+                    {displayName.length}/32
+                  </p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-white/75">
+                    Bio
+                  </label>
+                  <textarea
+                    maxLength={160}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value.slice(0, 160))}
+                    placeholder="Tell people about your taste."
+                    rows={5}
+                    className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/35 outline-none transition focus:border-violet-400/40"
+                  />
+                  <p className="mt-2 text-right text-xs tabular-nums text-white/35">
+                    {bio.length}/160
+                  </p>
                 </div>
               </div>
-            </div>
+            </section>
 
-            <div>
-              <label className="text-sm font-medium text-white/75">
-                Username
-              </label>
-              <input
-                value={`@${username}`}
-                disabled
-                className="mt-2 w-full cursor-not-allowed rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white/35 outline-none"
-              />
-              <p className="mt-2 text-xs text-white/35">
-                Username editing will be added later.
+            <section className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-6 md:p-8">
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-violet-300/80">
+                Profile extras
               </p>
-            </div>
 
-            <div>
-              <label className="text-sm font-medium text-white/75">
-                Display name
-              </label>
-              <input
-                maxLength={32}
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value.slice(0, 32))}
-                className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/35 outline-none transition focus:border-violet-400/40"
-              />
-              <p className="mt-2 text-right text-xs tabular-nums text-white/35">
-                {displayName.length}/32
-              </p>
-            </div>
+              <h2 className="mt-3 text-xl font-semibold tracking-tight">
+                Customize your identity
+              </h2>
 
-            <div>
-              <label className="text-sm font-medium text-white/75">Bio</label>
-              <textarea
-                maxLength={160}
-                value={bio}
-                onChange={(e) => setBio(e.target.value.slice(0, 160))}
-                placeholder="Tell people about your taste."
-                rows={5}
-                className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/35 outline-none transition focus:border-violet-400/40"
-              />
-              <p className="mt-2 text-right text-xs tabular-nums text-white/35">
-                {bio.length}/160
+              <p className="mt-2 text-sm leading-relaxed text-white/45">
+                These are future profile features. They are shown here already
+                so the settings page feels like it can grow naturally.
               </p>
-            </div>
+
+              <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2">
+                {[
+                  {
+                    title: "Featured badge",
+                    description:
+                      "Choose a badge to show next to your display name.",
+                  },
+                  {
+                    title: "Profile theme",
+                    description:
+                      "Pick a subtle color style for your profile header.",
+                  },
+                  {
+                    title: "Pinned review",
+                    description:
+                      "Highlight one favorite review on your profile.",
+                  },
+                  {
+                    title: "Public taste stats",
+                    description:
+                      "Choose which stats are visible to other users.",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="rounded-2xl border border-white/[0.06] bg-black/20 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-sm font-semibold text-white/85">
+                          {item.title}
+                        </h3>
+                        <p className="mt-2 text-sm leading-relaxed text-white/40">
+                          {item.description}
+                        </p>
+                      </div>
+
+                      <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-white/30">
+                        Soon
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
 
             {error ? (
               <p className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
@@ -336,25 +482,29 @@ export function SettingsForm({
               </p>
             ) : null}
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button
-                disabled={loading}
-                className="rounded-full bg-violet-500 px-6 py-3 text-sm font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loading ? "Saving..." : "Save changes"}
-              </button>
+            <div className="sticky bottom-4 z-10 rounded-2xl border border-white/[0.08] bg-[#080810]/90 p-3 backdrop-blur-xl">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-white/35">Signed in as {email}</p>
 
-              <Link
-                href="/profile"
-                className="rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-center text-sm font-medium text-white/60 transition hover:bg-white/[0.06] hover:text-white"
-              >
-                Cancel
-              </Link>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <Link
+                    href="/profile"
+                    className="rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-center text-sm font-medium text-white/60 transition hover:bg-white/[0.06] hover:text-white"
+                  >
+                    Cancel
+                  </Link>
+
+                  <button
+                    disabled={loading}
+                    className="rounded-full bg-violet-500 px-6 py-3 text-sm font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {loading ? "Saving..." : "Save changes"}
+                  </button>
+                </div>
+              </div>
             </div>
-
-            <p className="text-xs text-white/30">Signed in as {email}</p>
           </form>
-        </section>
+        </div>
       </div>
     </main>
   );
