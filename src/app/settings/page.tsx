@@ -15,7 +15,7 @@ export default async function SettingsPage() {
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("username, display_name, avatar_url, bio, onboarding_completed")
+    .select("username, display_name, avatar_url, bio, featured_badge_id, onboarding_completed")
     .eq("id", user.id)
     .single();
 
@@ -30,4 +30,4 @@ export default async function SettingsPage() {
       profile={profile}
     />
   );
-}
+}   

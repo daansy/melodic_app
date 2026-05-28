@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -13,7 +12,24 @@ type SettingsProfile = {
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  featured_badge_id: string | null;
 };
+
+type UnlockedBadge = {
+  id: string;
+  name: string;
+  description: string;
+  symbol: string;
+};
+
+const UNLOCKED_BADGES: UnlockedBadge[] = [
+  {
+    id: "early_member",
+    name: "Early Member",
+    description: "Joined Melodic during the early build.",
+    symbol: "✦",
+  },
+];
 
 export function SettingsForm({
   userId,
@@ -29,17 +45,33 @@ export function SettingsForm({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const username = profile.username || "user";
-  const initialDisplayName = profile.display_name || profile.username || "";
 
-  const [displayName, setDisplayName] = useState(initialDisplayName);
-  const [bio, setBio] = useState(profile.bio || "");
-
-  const [currentAvatarUrl, setCurrentAvatarUrl] = useState(
-    profile.avatar_url || ""
+  const [savedDisplayName, setSavedDisplayName] = useState(
+    profile.display_name || profile.username || ""
   );
+  const [savedBio, setSavedBio] = useState(profile.bio || "");
+  const [savedAvatarUrl, setSavedAvatarUrl] = useState(profile.avatar_url || "");
+
+  const [displayName, setDisplayName] = useState(savedDisplayName);
+  const [bio, setBio] = useState(savedBio);
+
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState(savedAvatarUrl);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [avatarRemoved, setAvatarRemoved] = useState(false);
+
+  const [badgePickerOpen, setBadgePickerOpen] = useState(false);
+  const initialSelectedBadge =
+  UNLOCKED_BADGES.find((badge) => badge.id === profile.featured_badge_id) ??
+  null;
+
+const [savedSelectedBadgeId, setSavedSelectedBadgeId] = useState(
+  profile.featured_badge_id || ""
+);
+
+const [selectedBadge, setSelectedBadge] = useState<UnlockedBadge | null>(
+  initialSelectedBadge
+);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -49,6 +81,14 @@ export function SettingsForm({
     displayName?.[0]?.toUpperCase() || username?.[0]?.toUpperCase() || "M";
 
   const visibleAvatarUrl = avatarPreview || currentAvatarUrl;
+
+  const hasChanges =
+  displayName !== savedDisplayName ||
+  bio !== savedBio ||
+  currentAvatarUrl !== savedAvatarUrl ||
+  avatarFile !== null ||
+  avatarRemoved ||
+  (selectedBadge?.id || "") !== savedSelectedBadgeId;
 
   function openFilePicker() {
     fileInputRef.current?.click();
@@ -86,6 +126,10 @@ export function SettingsForm({
     setSuccess("");
     setAvatarFile(null);
     setAvatarPreview("");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
   function removeCurrentAvatar() {
@@ -95,10 +139,34 @@ export function SettingsForm({
     setAvatarPreview("");
     setCurrentAvatarUrl("");
     setAvatarRemoved(true);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault();
+  function undoChanges() {
+    setError("");
+    setSuccess("");
+
+    setDisplayName(savedDisplayName);
+    setBio(savedBio);
+
+    setCurrentAvatarUrl(savedAvatarUrl);
+    setAvatarFile(null);
+    setAvatarPreview("");
+    setAvatarRemoved(false);
+    setSelectedBadge(
+        UNLOCKED_BADGES.find((badge) => badge.id === savedSelectedBadgeId) ?? null
+      );
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
+  async function handleSave(e?: React.FormEvent) {
+    e?.preventDefault();
 
     setError("");
     setSuccess("");
@@ -161,14 +229,15 @@ export function SettingsForm({
     }
 
     const { error: updateError } = await supabase
-      .from("profiles")
-      .update({
-        display_name: cleanDisplayName,
-        bio: cleanBio || null,
-        avatar_url: nextAvatarUrl,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", userId);
+    .from("profiles")
+    .update({
+      display_name: cleanDisplayName,
+      bio: cleanBio || null,
+      avatar_url: nextAvatarUrl,
+      featured_badge_id: selectedBadge?.id || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", userId);
 
     if (updateError) {
       setError(updateError.message);
@@ -176,12 +245,26 @@ export function SettingsForm({
       return;
     }
 
-    setCurrentAvatarUrl(nextAvatarUrl || "");
+    const nextSavedAvatarUrl = nextAvatarUrl || "";
+
+    setSavedDisplayName(cleanDisplayName);
+    setSavedBio(cleanBio);
+    setSavedAvatarUrl(nextSavedAvatarUrl);
+    setSavedSelectedBadgeId(selectedBadge?.id || "");
+
+    setDisplayName(cleanDisplayName);
+    setBio(cleanBio);
+    setCurrentAvatarUrl(nextSavedAvatarUrl);
+
     setAvatarFile(null);
     setAvatarPreview("");
     setAvatarRemoved(false);
-    setSuccess("Profile updated.");
 
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    setSuccess("Profile updated.");
     setLoading(false);
     router.refresh();
   }
@@ -198,12 +281,12 @@ export function SettingsForm({
       />
 
       <div className="mx-auto w-full max-w-[1180px]">
-        <Link
+        <a
           href="/profile"
           className="text-sm font-medium text-white/60 transition hover:text-white"
         >
           ← Back to profile
-        </Link>
+        </a>
 
         <div className="mt-8">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-violet-300/80">
@@ -294,12 +377,23 @@ export function SettingsForm({
                         {displayName || username}
                       </h2>
 
-                      <Link
-                        href="/profile/badges"
-                        className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-white/45 transition hover:border-violet-400/30 hover:text-violet-200"
-                      >
-                        Choose badge
-                      </Link>
+                      {selectedBadge ? (
+                        <button
+                          type="button"
+                          onClick={() => setBadgePickerOpen(true)}
+                          className="shrink-0 rounded-full border border-violet-300/20 bg-violet-500/10 px-3 py-1.5 text-[11px] font-medium text-violet-100 transition hover:border-violet-300/40 hover:bg-violet-500/15"
+                        >
+                          {selectedBadge.symbol} {selectedBadge.name}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setBadgePickerOpen(true)}
+                          className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-white/45 transition hover:border-violet-400/30 hover:text-violet-200"
+                        >
+                          Choose badge
+                        </button>
+                      )}
                     </div>
 
                     <p className="mt-1 break-words text-sm text-white/45">
@@ -386,9 +480,10 @@ export function SettingsForm({
                   <input
                     maxLength={32}
                     value={displayName}
-                    onChange={(e) =>
-                      setDisplayName(e.target.value.slice(0, 32))
-                    }
+                    onChange={(e) => {
+                      setSuccess("");
+                      setDisplayName(e.target.value.slice(0, 32));
+                    }}
                     className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/35 outline-none transition focus:border-violet-400/40"
                   />
                   <p className="mt-2 text-right text-xs tabular-nums text-white/35">
@@ -403,7 +498,10 @@ export function SettingsForm({
                   <textarea
                     maxLength={160}
                     value={bio}
-                    onChange={(e) => setBio(e.target.value.slice(0, 160))}
+                    onChange={(e) => {
+                      setSuccess("");
+                      setBio(e.target.value.slice(0, 160));
+                    }}
                     placeholder="Tell people about your taste."
                     rows={5}
                     className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/35 outline-none transition focus:border-violet-400/40"
@@ -426,31 +524,116 @@ export function SettingsForm({
                 {success}
               </p>
             ) : null}
-
-            <div className="rounded-2xl border border-white/[0.08] bg-[#080810]/90 p-3 backdrop-blur-xl">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-white/35">Signed in as {email}</p>
-
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <Link
-                    href="/profile"
-                    className="rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-center text-sm font-medium text-white/60 transition hover:bg-white/[0.06] hover:text-white"
-                  >
-                    Cancel
-                  </Link>
-
-                  <button
-                    disabled={loading}
-                    className="rounded-full bg-violet-500 px-6 py-3 text-sm font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {loading ? "Saving..." : "Save changes"}
-                  </button>
-                </div>
-              </div>
-            </div>
           </form>
         </div>
       </div>
+
+      {badgePickerOpen ? (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-5 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-white/[0.08] bg-[#0b0b14] p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-violet-300/80">
+                  Featured badge
+                </p>
+                <h2 className="mt-2 text-xl font-semibold tracking-tight">
+                  Choose a badge
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-white/45">
+                  Only badges you have unlocked are shown here.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setBadgePickerOpen(false)}
+                className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-white/45 transition hover:bg-white/[0.06] hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              {UNLOCKED_BADGES.length > 0 ? (
+                UNLOCKED_BADGES.map((badge) => (
+                  <button
+                    key={badge.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedBadge(badge);
+                      setBadgePickerOpen(false);
+                    }}
+                    className={
+                      selectedBadge?.id === badge.id
+                        ? "flex w-full items-center gap-4 rounded-2xl border border-violet-300/30 bg-violet-500/10 p-4 text-left"
+                        : "flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 text-left transition hover:border-violet-300/20 hover:bg-white/[0.05]"
+                    }
+                  >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-black/30 text-lg">
+                      {badge.symbol}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-white">
+                        {badge.name}
+                      </p>
+                      <p className="mt-1 text-xs leading-relaxed text-white/40">
+                        {badge.description}
+                      </p>
+                    </div>
+
+                    {selectedBadge?.id === badge.id ? (
+                      <span className="text-xs font-medium text-violet-200">
+                        Selected
+                      </span>
+                    ) : null}
+                  </button>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 p-6 text-center">
+                  <p className="text-sm font-medium text-white/70">
+                    No badges unlocked yet
+                  </p>
+                  <p className="mt-2 text-sm text-white/40">
+                    Once you unlock badges, you can feature one next to your
+                    name.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {hasChanges ? (
+        <div className="fixed inset-x-0 bottom-5 z-30 flex justify-center px-5">
+          <div className="flex w-full max-w-md items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-[#0b0b14]/95 p-3 shadow-2xl backdrop-blur-xl">
+            <p className="hidden text-sm text-white/55 sm:block">
+              Unsaved changes
+            </p>
+
+            <div className="flex w-full gap-3 sm:w-auto">
+              <button
+                type="button"
+                onClick={undoChanges}
+                disabled={loading}
+                className="flex-1 rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-white/60 transition hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+              >
+                Undo
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                disabled={loading}
+                className="flex-1 rounded-full bg-violet-500 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+              >
+                {loading ? "Saving..." : "Save changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
