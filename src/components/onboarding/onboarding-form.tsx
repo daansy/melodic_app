@@ -22,8 +22,10 @@ export function OnboardingForm({
     .replace(/[^a-z0-9_]/g, "")
     .slice(0, 20);
 
-  const [username, setUsername] = useState(suggestedUsername);
-  const [displayName, setDisplayName] = useState(fullName.slice(0, 32));
+  const suggestedDisplayName = fullName.slice(0, 32);
+
+  const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -108,8 +110,8 @@ export function OnboardingForm({
                       .slice(0, 20)
                   )
                 }
-                placeholder="your_username"
-                className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-violet-400/40"
+                placeholder={suggestedUsername || "your_username"}
+                className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/35 outline-none transition focus:border-violet-400/40"
               />
 
               <div className="mt-2 flex items-center justify-between gap-4 text-xs text-white/35">
@@ -124,8 +126,8 @@ export function OnboardingForm({
                 maxLength={32}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value.slice(0, 32))}
-                placeholder="Your display name"
-                className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-violet-400/40"
+                placeholder={suggestedDisplayName || "Your display name"}
+                className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/35 outline-none transition focus:border-violet-400/40"
               />
 
               <p className="mt-2 text-right text-xs tabular-nums text-white/35">
@@ -141,7 +143,7 @@ export function OnboardingForm({
                 onChange={(e) => setBio(e.target.value.slice(0, 160))}
                 placeholder="Tell people about your taste."
                 rows={4}
-                className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-violet-400/40"
+                className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/35 outline-none transition focus:border-violet-400/40"
               />
 
               <p className="mt-2 text-right text-xs tabular-nums text-white/35">
