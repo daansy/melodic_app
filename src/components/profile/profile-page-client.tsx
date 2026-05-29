@@ -93,7 +93,7 @@ const USER_RANKS: Rank[] = [
     minPoints: 0,
     icon: "note",
     colorClasses: "border-slate-400/20 bg-slate-500/10 text-slate-100",
-    iconClasses: "border-slate-300/25 bg-slate-400/15 text-slate-100",
+    iconClasses: "border-slate-300/25 bg-slate-400/10 text-slate-300",
     description: "Your first step into Melodic.",
   },
 
@@ -104,7 +104,7 @@ const USER_RANKS: Rank[] = [
     icon: "headphones",
     tier: 1,
     colorClasses: "border-sky-400/20 bg-sky-500/10 text-sky-100",
-    iconClasses: "border-sky-300/25 bg-sky-400/15 text-sky-100",
+    iconClasses: "border-sky-300/25 bg-sky-400/10 text-sky-300",
     description: "Starting to build a listening identity.",
   },
   {
@@ -114,7 +114,7 @@ const USER_RANKS: Rank[] = [
     icon: "headphones",
     tier: 2,
     colorClasses: "border-sky-400/20 bg-sky-500/10 text-sky-100",
-    iconClasses: "border-sky-300/25 bg-sky-400/20 text-sky-100",
+    iconClasses: "border-sky-300/25 bg-sky-400/12 text-sky-300",
     description: "Your ratings are becoming more consistent.",
   },
   {
@@ -124,7 +124,7 @@ const USER_RANKS: Rank[] = [
     icon: "headphones",
     tier: 3,
     colorClasses: "border-sky-400/20 bg-sky-500/10 text-sky-100",
-    iconClasses: "border-sky-300/25 bg-sky-400/25 text-sky-50",
+    iconClasses: "border-sky-300/25 bg-sky-400/15 text-sky-200",
     description: "You are no longer just passing through.",
   },
 
@@ -135,7 +135,7 @@ const USER_RANKS: Rank[] = [
     icon: "vinyl",
     tier: 1,
     colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
-    iconClasses: "border-emerald-300/25 bg-emerald-400/15 text-emerald-100",
+    iconClasses: "border-emerald-300/25 bg-emerald-400/10 text-emerald-300",
     description: "You are actively scouting albums and projects.",
   },
   {
@@ -145,7 +145,7 @@ const USER_RANKS: Rank[] = [
     icon: "vinyl",
     tier: 2,
     colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
-    iconClasses: "border-emerald-300/25 bg-emerald-400/20 text-emerald-100",
+    iconClasses: "border-emerald-300/25 bg-emerald-400/12 text-emerald-300",
     description: "Your catalog is getting wider.",
   },
   {
@@ -155,7 +155,7 @@ const USER_RANKS: Rank[] = [
     icon: "vinyl",
     tier: 3,
     colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
-    iconClasses: "border-emerald-300/25 bg-emerald-400/25 text-emerald-50",
+    iconClasses: "border-emerald-300/25 bg-emerald-400/15 text-emerald-200",
     description: "You are exploring albums with real intent.",
   },
 
@@ -166,7 +166,7 @@ const USER_RANKS: Rank[] = [
     icon: "catalog_stack",
     tier: 1,
     colorClasses: "border-yellow-400/20 bg-yellow-500/10 text-yellow-100",
-    iconClasses: "border-yellow-300/30 bg-yellow-400/20 text-yellow-100",
+    iconClasses: "border-yellow-300/30 bg-yellow-400/10 text-yellow-300",
     description: "Your profile is becoming a curated music catalog.",
   },
   {
@@ -176,7 +176,7 @@ const USER_RANKS: Rank[] = [
     icon: "catalog_shelves",
     tier: 2,
     colorClasses: "border-yellow-400/20 bg-yellow-500/10 text-yellow-100",
-    iconClasses: "border-yellow-300/30 bg-yellow-400/25 text-yellow-100",
+    iconClasses: "border-yellow-300/30 bg-yellow-400/12 text-yellow-300",
     description: "Your taste archive is gaining depth.",
   },
   {
@@ -186,7 +186,7 @@ const USER_RANKS: Rank[] = [
     icon: "catalog_crown",
     tier: 3,
     colorClasses: "border-yellow-400/20 bg-yellow-500/10 text-yellow-100",
-    iconClasses: "border-yellow-300/30 bg-yellow-400/30 text-yellow-50",
+    iconClasses: "border-yellow-300/30 bg-yellow-400/15 text-yellow-200",
     description: "A serious and recognizable catalog is forming.",
   },
 
@@ -197,7 +197,7 @@ const USER_RANKS: Rank[] = [
     icon: "microphone",
     tier: 1,
     colorClasses: "border-rose-400/20 bg-rose-500/10 text-rose-100",
-    iconClasses: "border-rose-300/25 bg-rose-400/15 text-rose-100",
+    iconClasses: "border-rose-300/25 bg-rose-400/10 text-rose-300",
     description: "Your scores start to carry weight.",
   },
   {
@@ -207,7 +207,7 @@ const USER_RANKS: Rank[] = [
     icon: "microphone",
     tier: 2,
     colorClasses: "border-rose-400/20 bg-rose-500/10 text-rose-100",
-    iconClasses: "border-rose-300/25 bg-rose-400/20 text-rose-100",
+    iconClasses: "border-rose-300/25 bg-rose-400/12 text-rose-300",
     description: "Sharper ratings and stronger opinions.",
   },
   {
@@ -217,7 +217,7 @@ const USER_RANKS: Rank[] = [
     icon: "microphone",
     tier: 3,
     colorClasses: "border-rose-400/20 bg-rose-500/10 text-rose-100",
-    iconClasses: "border-rose-300/25 bg-rose-400/25 text-rose-50",
+    iconClasses: "border-rose-300/25 bg-rose-400/15 text-rose-200",
     description: "A serious voice in music ranking.",
   },
 
@@ -228,7 +228,7 @@ const USER_RANKS: Rank[] = [
     icon: "spark",
     tier: 1,
     colorClasses: "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
-    iconClasses: "border-fuchsia-300/25 bg-fuchsia-400/15 text-fuchsia-100",
+    iconClasses: "border-fuchsia-300/25 bg-fuchsia-400/10 text-fuchsia-300",
     description: "Your taste has a clear signature.",
   },
   {
@@ -238,7 +238,7 @@ const USER_RANKS: Rank[] = [
     icon: "spark",
     tier: 2,
     colorClasses: "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
-    iconClasses: "border-fuchsia-300/25 bg-fuchsia-400/20 text-fuchsia-100",
+    iconClasses: "border-fuchsia-300/25 bg-fuchsia-400/12 text-fuchsia-300",
     description: "You shape mood and taste with confidence.",
   },
   {
@@ -248,7 +248,7 @@ const USER_RANKS: Rank[] = [
     icon: "spark",
     tier: 3,
     colorClasses: "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
-    iconClasses: "border-fuchsia-300/25 bg-fuchsia-400/25 text-fuchsia-50",
+    iconClasses: "border-fuchsia-300/25 bg-fuchsia-400/15 text-fuchsia-200",
     description: "A rare level of taste presence.",
   },
 
@@ -259,7 +259,7 @@ const USER_RANKS: Rank[] = [
     icon: "wave",
     tier: 1,
     colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
-    iconClasses: "border-indigo-300/25 bg-indigo-400/15 text-indigo-100",
+    iconClasses: "border-indigo-300/25 bg-indigo-400/10 text-indigo-300",
     description: "You start seeing patterns most listeners miss.",
   },
   {
@@ -269,7 +269,7 @@ const USER_RANKS: Rank[] = [
     icon: "wave",
     tier: 2,
     colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
-    iconClasses: "border-indigo-300/25 bg-indigo-400/20 text-indigo-100",
+    iconClasses: "border-indigo-300/25 bg-indigo-400/12 text-indigo-300",
     description: "A very high-status music identity.",
   },
   {
@@ -279,7 +279,7 @@ const USER_RANKS: Rank[] = [
     icon: "vision_peak",
     tier: 3,
     colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
-    iconClasses: "border-indigo-300/25 bg-indigo-400/25 text-indigo-50",
+    iconClasses: "border-indigo-300/25 bg-indigo-400/15 text-indigo-200",
     description: "Almost untouchable taste territory.",
   },
 
@@ -289,7 +289,7 @@ const USER_RANKS: Rank[] = [
     minPoints: 1500000,
     icon: "crown",
     colorClasses: "border-violet-400/25 bg-violet-500/10 text-violet-100",
-    iconClasses: "border-violet-300/25 bg-violet-400/25 text-violet-50",
+    iconClasses: "border-violet-300/25 bg-violet-400/15 text-violet-200",
     description: "The rarest status in Melodic.",
   },
 ];
@@ -332,7 +332,7 @@ function RankIcon({ kind, tier }: { kind: RankIconKind; tier?: 1 | 2 | 3 }) {
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.9"
+      strokeWidth="2.15"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
