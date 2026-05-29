@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArtist, getArtistReleases } from "@/lib/spotify";
+import { getMyRatings } from "@/lib/ratings";
 import { AlbumCarousel } from "@/components/album-carousel";
 
 export default async function ArtistPage({
@@ -20,6 +21,9 @@ export default async function ArtistPage({
   }
 
   const { albums, singles } = releases;
+
+  const allIds = [...albums.map((a) => a.id), ...singles.map((s) => s.id)];
+  const albumRatings = await getMyRatings("album", allIds);
 
   return (
     <main className="min-h-screen bg-[#05050d] text-white">
@@ -72,7 +76,7 @@ export default async function ArtistPage({
           <h2 className="text-lg font-semibold tracking-tight">Albums</h2>
           {albums.length > 0 ? (
             <div className="mt-4">
-              <AlbumCarousel albums={albums} />
+              <AlbumCarousel albums={albums} ratings={albumRatings} />
             </div>
           ) : (
             <div className="mt-4 rounded-2xl border border-dashed border-white/10 bg-black/20 p-8 text-center">
@@ -88,7 +92,7 @@ export default async function ArtistPage({
           <section className="mt-10">
             <h2 className="text-lg font-semibold tracking-tight">Singles &amp; EPs</h2>
             <div className="mt-4">
-              <AlbumCarousel albums={singles} />
+              <AlbumCarousel albums={singles} ratings={albumRatings} />
             </div>
           </section>
         ) : null}
