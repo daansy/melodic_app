@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_SEARCH_URL = "https://api.spotify.com/v1/search";
-const SEARCH_RESULT_LIMIT = 24;
+const SEARCH_RESULT_LIMIT = 20;
 const SEARCH_MARKET = "NL";
 const MIN_QUERY_LENGTH = 2;
 
@@ -79,6 +79,8 @@ async function searchAlbums(query: string) {
   url.searchParams.set("type", "album");
   url.searchParams.set("limit", String(SEARCH_RESULT_LIMIT));
   url.searchParams.set("market", SEARCH_MARKET);
+
+  console.log("Spotify search URL:", url.toString());
 
   const response = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${token}` },
