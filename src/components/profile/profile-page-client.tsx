@@ -20,13 +20,24 @@ type RatingRow = {
   created_at: string | null;
 };
 
+type RankIconKind =
+  | "note"
+  | "headphones"
+  | "vinyl"
+  | "catalog"
+  | "microphone"
+  | "spark"
+  | "wave"
+  | "crown";
+
 type Rank = {
   id: string;
   name: string;
   minPoints: number;
-  emblem: string;
+  icon: RankIconKind;
+  tier?: 1 | 2 | 3;
   colorClasses: string;
-  emblemClasses: string;
+  iconClasses: string;
   description: string;
 };
 
@@ -77,9 +88,9 @@ const USER_RANKS: Rank[] = [
     id: "newcomer",
     name: "Newcomer",
     minPoints: 0,
-    emblem: "◌",
+    icon: "note",
     colorClasses: "border-slate-400/20 bg-slate-500/10 text-slate-100",
-    emblemClasses: "border-slate-300/20 bg-slate-400/15 text-slate-100",
+    iconClasses: "border-slate-300/25 bg-slate-400/15 text-slate-100",
     description: "Your first step into Melodic.",
   },
 
@@ -87,27 +98,30 @@ const USER_RANKS: Rank[] = [
     id: "rookie_listener_1",
     name: "Rookie Listener I",
     minPoints: 250,
-    emblem: "♪",
+    icon: "headphones",
+    tier: 1,
     colorClasses: "border-sky-400/20 bg-sky-500/10 text-sky-100",
-    emblemClasses: "border-sky-300/20 bg-sky-400/15 text-sky-100",
+    iconClasses: "border-sky-300/25 bg-sky-400/15 text-sky-100",
     description: "Starting to build a listening identity.",
   },
   {
     id: "rookie_listener_2",
     name: "Rookie Listener II",
     minPoints: 750,
-    emblem: "♫",
+    icon: "headphones",
+    tier: 2,
     colorClasses: "border-sky-400/20 bg-sky-500/10 text-sky-100",
-    emblemClasses: "border-sky-300/20 bg-sky-400/20 text-sky-100",
+    iconClasses: "border-sky-300/25 bg-sky-400/20 text-sky-100",
     description: "Your ratings are becoming more consistent.",
   },
   {
     id: "rookie_listener_3",
     name: "Rookie Listener III",
     minPoints: 1500,
-    emblem: "♬",
+    icon: "headphones",
+    tier: 3,
     colorClasses: "border-sky-400/20 bg-sky-500/10 text-sky-100",
-    emblemClasses: "border-sky-300/20 bg-sky-400/25 text-sky-50",
+    iconClasses: "border-sky-300/25 bg-sky-400/25 text-sky-50",
     description: "You are no longer just passing through.",
   },
 
@@ -115,27 +129,30 @@ const USER_RANKS: Rank[] = [
     id: "album_scout_1",
     name: "Album Scout I",
     minPoints: 3000,
-    emblem: "◧",
+    icon: "vinyl",
+    tier: 1,
     colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
-    emblemClasses: "border-emerald-300/20 bg-emerald-400/15 text-emerald-100",
+    iconClasses: "border-emerald-300/25 bg-emerald-400/15 text-emerald-100",
     description: "You are actively scouting albums and projects.",
   },
   {
     id: "album_scout_2",
     name: "Album Scout II",
     minPoints: 6000,
-    emblem: "◨",
+    icon: "vinyl",
+    tier: 2,
     colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
-    emblemClasses: "border-emerald-300/20 bg-emerald-400/20 text-emerald-100",
+    iconClasses: "border-emerald-300/25 bg-emerald-400/20 text-emerald-100",
     description: "Your catalog is getting wider.",
   },
   {
     id: "album_scout_3",
     name: "Album Scout III",
     minPoints: 10000,
-    emblem: "◩",
+    icon: "vinyl",
+    tier: 3,
     colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
-    emblemClasses: "border-emerald-300/20 bg-emerald-400/25 text-emerald-50",
+    iconClasses: "border-emerald-300/25 bg-emerald-400/25 text-emerald-50",
     description: "You are exploring albums with real intent.",
   },
 
@@ -143,27 +160,30 @@ const USER_RANKS: Rank[] = [
     id: "catalog_curator_1",
     name: "Catalog Curator I",
     minPoints: 17500,
-    emblem: "▥",
+    icon: "catalog",
+    tier: 1,
     colorClasses: "border-amber-400/20 bg-amber-500/10 text-amber-100",
-    emblemClasses: "border-amber-300/20 bg-amber-400/15 text-amber-100",
+    iconClasses: "border-amber-300/25 bg-amber-400/15 text-amber-100",
     description: "Your profile is becoming a curated music catalog.",
   },
   {
     id: "catalog_curator_2",
     name: "Catalog Curator II",
     minPoints: 30000,
-    emblem: "▧",
+    icon: "catalog",
+    tier: 2,
     colorClasses: "border-amber-400/20 bg-amber-500/10 text-amber-100",
-    emblemClasses: "border-amber-300/20 bg-amber-400/20 text-amber-100",
+    iconClasses: "border-amber-300/25 bg-amber-400/20 text-amber-100",
     description: "Your taste archive is gaining depth.",
   },
   {
     id: "catalog_curator_3",
     name: "Catalog Curator III",
     minPoints: 50000,
-    emblem: "▩",
+    icon: "catalog",
+    tier: 3,
     colorClasses: "border-amber-400/20 bg-amber-500/10 text-amber-100",
-    emblemClasses: "border-amber-300/20 bg-amber-400/25 text-amber-50",
+    iconClasses: "border-amber-300/25 bg-amber-400/25 text-amber-50",
     description: "A serious and recognizable catalog is forming.",
   },
 
@@ -171,27 +191,30 @@ const USER_RANKS: Rank[] = [
     id: "certified_critic_1",
     name: "Certified Critic I",
     minPoints: 75000,
-    emblem: "✎",
+    icon: "microphone",
+    tier: 1,
     colorClasses: "border-rose-400/20 bg-rose-500/10 text-rose-100",
-    emblemClasses: "border-rose-300/20 bg-rose-400/15 text-rose-100",
+    iconClasses: "border-rose-300/25 bg-rose-400/15 text-rose-100",
     description: "Your scores start to carry weight.",
   },
   {
     id: "certified_critic_2",
     name: "Certified Critic II",
     minPoints: 110000,
-    emblem: "✐",
+    icon: "microphone",
+    tier: 2,
     colorClasses: "border-rose-400/20 bg-rose-500/10 text-rose-100",
-    emblemClasses: "border-rose-300/20 bg-rose-400/20 text-rose-100",
+    iconClasses: "border-rose-300/25 bg-rose-400/20 text-rose-100",
     description: "Sharper ratings and stronger opinions.",
   },
   {
     id: "certified_critic_3",
     name: "Certified Critic III",
     minPoints: 160000,
-    emblem: "✒",
+    icon: "microphone",
+    tier: 3,
     colorClasses: "border-rose-400/20 bg-rose-500/10 text-rose-100",
-    emblemClasses: "border-rose-300/20 bg-rose-400/25 text-rose-50",
+    iconClasses: "border-rose-300/25 bg-rose-400/25 text-rose-50",
     description: "A serious voice in music ranking.",
   },
 
@@ -199,27 +222,30 @@ const USER_RANKS: Rank[] = [
     id: "vibe_virtuoso_1",
     name: "Vibe Virtuoso I",
     minPoints: 225000,
-    emblem: "✦",
+    icon: "spark",
+    tier: 1,
     colorClasses: "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
-    emblemClasses: "border-fuchsia-300/20 bg-fuchsia-400/15 text-fuchsia-100",
+    iconClasses: "border-fuchsia-300/25 bg-fuchsia-400/15 text-fuchsia-100",
     description: "Your taste has a clear signature.",
   },
   {
     id: "vibe_virtuoso_2",
     name: "Vibe Virtuoso II",
     minPoints: 325000,
-    emblem: "✶",
+    icon: "spark",
+    tier: 2,
     colorClasses: "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
-    emblemClasses: "border-fuchsia-300/20 bg-fuchsia-400/20 text-fuchsia-100",
+    iconClasses: "border-fuchsia-300/25 bg-fuchsia-400/20 text-fuchsia-100",
     description: "You shape mood and taste with confidence.",
   },
   {
     id: "vibe_virtuoso_3",
     name: "Vibe Virtuoso III",
     minPoints: 450000,
-    emblem: "✷",
+    icon: "spark",
+    tier: 3,
     colorClasses: "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
-    emblemClasses: "border-fuchsia-300/20 bg-fuchsia-400/25 text-fuchsia-50",
+    iconClasses: "border-fuchsia-300/25 bg-fuchsia-400/25 text-fuchsia-50",
     description: "A rare level of taste presence.",
   },
 
@@ -227,27 +253,30 @@ const USER_RANKS: Rank[] = [
     id: "sonic_visionary_1",
     name: "Sonic Visionary I",
     minPoints: 600000,
-    emblem: "◔",
+    icon: "wave",
+    tier: 1,
     colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
-    emblemClasses: "border-indigo-300/20 bg-indigo-400/15 text-indigo-100",
+    iconClasses: "border-indigo-300/25 bg-indigo-400/15 text-indigo-100",
     description: "You start seeing patterns most listeners miss.",
   },
   {
     id: "sonic_visionary_2",
     name: "Sonic Visionary II",
     minPoints: 850000,
-    emblem: "◑",
+    icon: "wave",
+    tier: 2,
     colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
-    emblemClasses: "border-indigo-300/20 bg-indigo-400/20 text-indigo-100",
+    iconClasses: "border-indigo-300/25 bg-indigo-400/20 text-indigo-100",
     description: "A very high-status music identity.",
   },
   {
     id: "sonic_visionary_3",
     name: "Sonic Visionary III",
     minPoints: 1150000,
-    emblem: "◉",
+    icon: "wave",
+    tier: 3,
     colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
-    emblemClasses: "border-indigo-300/20 bg-indigo-400/25 text-indigo-50",
+    iconClasses: "border-indigo-300/25 bg-indigo-400/25 text-indigo-50",
     description: "Almost untouchable taste territory.",
   },
 
@@ -255,9 +284,9 @@ const USER_RANKS: Rank[] = [
     id: "melodic_legend",
     name: "Melodic Legend",
     minPoints: 1500000,
-    emblem: "✪",
+    icon: "crown",
     colorClasses: "border-violet-400/25 bg-violet-500/10 text-violet-100",
-    emblemClasses: "border-violet-300/25 bg-violet-400/25 text-violet-50",
+    iconClasses: "border-violet-300/25 bg-violet-400/25 text-violet-50",
     description: "The rarest status in Melodic.",
   },
 ];
@@ -289,6 +318,161 @@ function getCurrentRank(points: number) {
 
 function getNextRank(points: number) {
   return USER_RANKS.find((rank) => rank.minPoints > points) ?? null;
+}
+
+function RankIcon({ kind, tier }: { kind: RankIconKind; tier?: 1 | 2 | 3 }) {
+  const detailLevel = tier ?? 1;
+
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {kind === "note" ? (
+        <>
+          <path d="M9 18V6l9-2v12" />
+          <circle cx="7" cy="18" r="2" />
+          <circle cx="16" cy="16" r="2" />
+        </>
+      ) : null}
+
+      {kind === "headphones" ? (
+        <>
+          <path d="M4 13a8 8 0 0 1 16 0" />
+          <path d="M4 13v4a2 2 0 0 0 2 2h1v-6H6a2 2 0 0 0-2 2" />
+          <path d="M20 13v4a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2" />
+          {detailLevel >= 2 ? <path d="M9 20h6" /> : null}
+          {detailLevel >= 3 ? <path d="M12 3v2" /> : null}
+        </>
+      ) : null}
+
+      {kind === "vinyl" ? (
+        <>
+          <circle cx="12" cy="12" r="8" />
+          <circle cx="12" cy="12" r="2" />
+          {detailLevel >= 2 ? <circle cx="12" cy="12" r="5" /> : null}
+          {detailLevel >= 3 ? (
+            <>
+              <path d="M12 4v3" />
+              <path d="M20 12h-3" />
+              <path d="M12 20v-3" />
+              <path d="M4 12h3" />
+            </>
+          ) : null}
+        </>
+      ) : null}
+
+      {kind === "catalog" ? (
+        <>
+          <path d="M5 6h14" />
+          <path d="M5 11h14" />
+          <path d="M5 16h14" />
+          <path d="M7 6v10" />
+          {detailLevel >= 2 ? <path d="M12 6v10" /> : null}
+          {detailLevel >= 3 ? (
+            <>
+              <path d="M17 6v10" />
+              <path d="M4 20h16" />
+            </>
+          ) : null}
+        </>
+      ) : null}
+
+      {kind === "microphone" ? (
+        <>
+          <rect x="9" y="3" width="6" height="10" rx="3" />
+          <path d="M5 11a7 7 0 0 0 14 0" />
+          <path d="M12 18v3" />
+          <path d="M9 21h6" />
+          {detailLevel >= 2 ? (
+            <>
+              <path d="M7 8H5" />
+              <path d="M19 8h-2" />
+            </>
+          ) : null}
+          {detailLevel >= 3 ? (
+            <>
+              <path d="M8 4 6.5 2.5" />
+              <path d="m16 4 1.5-1.5" />
+            </>
+          ) : null}
+        </>
+      ) : null}
+
+      {kind === "spark" ? (
+        <>
+          <path d="M12 3 13.8 8.2 19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z" />
+          {detailLevel >= 2 ? (
+            <path d="M5 16.5 5.8 19 8.3 19.8 5.8 20.6 5 23l-.8-2.4L1.7 19.8 4.2 19 5 16.5Z" />
+          ) : null}
+          {detailLevel >= 3 ? (
+            <path d="M19 2 19.7 4.1 22 5l-2.3.8L19 8l-.8-2.2L16 5l2.2-.9L19 2Z" />
+          ) : null}
+        </>
+      ) : null}
+
+      {kind === "wave" ? (
+        <>
+          <path d="M4 15c2-6 4 6 6 0s4 6 6 0 3-2 4 0" />
+          {detailLevel >= 2 ? (
+            <path d="M4 10c2-5 4 5 6 0s4 5 6 0 3-2 4 0" />
+          ) : null}
+          {detailLevel >= 3 ? (
+            <>
+              <path d="M4 5c2-4 4 4 6 0s4 4 6 0 3-1 4 0" />
+              <circle cx="12" cy="12" r="9" />
+            </>
+          ) : null}
+        </>
+      ) : null}
+
+      {kind === "crown" ? (
+        <>
+          <path d="m3 8 4 4 5-7 5 7 4-4-2 11H5L3 8Z" />
+          <path d="M5 19h14" />
+          <circle cx="12" cy="5" r="1" />
+          <circle cx="7" cy="12" r="1" />
+          <circle cx="17" cy="12" r="1" />
+        </>
+      ) : null}
+    </svg>
+  );
+}
+
+function RankIconBox({
+  rank,
+  unlocked,
+  size = "normal",
+}: {
+  rank: Rank;
+  unlocked: boolean;
+  size?: "small" | "normal";
+}) {
+  return (
+    <div
+      className={`relative flex shrink-0 items-center justify-center rounded-xl border ${
+        size === "small" ? "h-10 w-10" : "h-11 w-11"
+      } ${
+        unlocked
+          ? rank.iconClasses
+          : "border-white/10 bg-white/[0.03] text-white/30"
+      }`}
+    >
+      <RankIcon kind={rank.icon} tier={rank.tier} />
+
+      {rank.tier ? (
+        <span className="absolute -bottom-1 -right-1 rounded-full border border-black/30 bg-black/80 px-1.5 py-[1px] text-[8px] font-semibold leading-none text-white">
+          {rank.tier === 1 ? "I" : rank.tier === 2 ? "II" : "III"}
+        </span>
+      ) : null}
+    </div>
+  );
 }
 
 export function ProfilePageClient({
@@ -422,12 +606,12 @@ export function ProfilePageClient({
                 <button
                   type="button"
                   onClick={() => setIsRankModalOpen(true)}
-                  className="rounded-xl border border-violet-300/20 bg-violet-500/10 px-3 py-2 text-center transition hover:border-violet-300/40 hover:bg-violet-500/15"
+                  className="group rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2 text-center transition hover:border-white/10 hover:bg-white/[0.03]"
                 >
-                  <p className="text-[9px] uppercase tracking-wider text-violet-200/60">
+                  <p className="text-[9px] uppercase tracking-wider text-white/35">
                     Points
                   </p>
-                  <p className="mt-0.5 text-lg font-semibold tabular-nums text-white">
+                  <p className="mt-0.5 text-lg font-semibold tabular-nums text-white underline-offset-4 group-hover:underline group-hover:decoration-violet-300/70">
                     {points.toLocaleString()}
                   </p>
                 </button>
@@ -572,8 +756,8 @@ export function ProfilePageClient({
 
       {isRankModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm">
-          <div className="flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0b0b14] shadow-2xl">
-            <div className="flex items-start justify-between gap-4 border-b border-white/[0.06] px-5 py-4 md:px-6">
+          <div className="flex max-h-[84vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0b0b14] shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-white/[0.06] px-5 py-4">
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-violet-300/80">
                   Melodic ranks
@@ -581,7 +765,7 @@ export function ProfilePageClient({
                 <h2 className="mt-1 text-2xl font-semibold tracking-tight text-white">
                   Point ranks
                 </h2>
-                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-white/45">
+                <p className="mt-1 max-w-xl text-sm leading-relaxed text-white/45">
                   Rank up by rating albums and tracks.
                 </p>
               </div>
@@ -595,7 +779,7 @@ export function ProfilePageClient({
               </button>
             </div>
 
-            <div className="border-b border-white/[0.06] px-5 py-4 md:px-6">
+            <div className="border-b border-white/[0.06] px-5 py-4">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-3">
                   <p className="text-[10px] uppercase tracking-wider text-white/35">
@@ -613,11 +797,7 @@ export function ProfilePageClient({
                     Current rank
                   </p>
                   <div className="mt-2 flex items-center gap-3">
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl border text-lg font-semibold ${currentRank.emblemClasses}`}
-                    >
-                      {currentRank.emblem}
-                    </div>
+                    <RankIconBox rank={currentRank} unlocked size="small" />
                     <div>
                       <p className="text-sm font-semibold text-white">
                         {currentRank.name}
@@ -661,8 +841,8 @@ export function ProfilePageClient({
               </div>
             </div>
 
-            <div className="overflow-y-auto px-5 py-4 md:px-6">
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+            <div className="overflow-y-auto px-5 py-4">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 {USER_RANKS.map((rank) => {
                   const unlocked = points >= rank.minPoints;
                   const isCurrent = currentRank.id === rank.id;
@@ -679,15 +859,7 @@ export function ProfilePageClient({
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div
-                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-xl font-semibold ${
-                            unlocked
-                              ? rank.emblemClasses
-                              : "border-white/10 bg-white/[0.03] text-white/30"
-                          }`}
-                        >
-                          {rank.emblem}
-                        </div>
+                        <RankIconBox rank={rank} unlocked={unlocked} />
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
