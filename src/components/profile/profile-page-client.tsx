@@ -24,10 +24,13 @@ type RankIconKind =
   | "note"
   | "headphones"
   | "vinyl"
-  | "catalog"
+  | "catalog_stack"
+  | "catalog_shelves"
+  | "catalog_crown"
   | "microphone"
   | "spark"
   | "wave"
+  | "vision_peak"
   | "crown";
 
 type Rank = {
@@ -160,30 +163,30 @@ const USER_RANKS: Rank[] = [
     id: "catalog_curator_1",
     name: "Catalog Curator I",
     minPoints: 17500,
-    icon: "catalog",
+    icon: "catalog_stack",
     tier: 1,
-    colorClasses: "border-amber-400/20 bg-amber-500/10 text-amber-100",
-    iconClasses: "border-amber-300/25 bg-amber-400/15 text-amber-100",
+    colorClasses: "border-yellow-400/20 bg-yellow-500/10 text-yellow-100",
+    iconClasses: "border-yellow-300/30 bg-yellow-400/20 text-yellow-100",
     description: "Your profile is becoming a curated music catalog.",
   },
   {
     id: "catalog_curator_2",
     name: "Catalog Curator II",
     minPoints: 30000,
-    icon: "catalog",
+    icon: "catalog_shelves",
     tier: 2,
-    colorClasses: "border-amber-400/20 bg-amber-500/10 text-amber-100",
-    iconClasses: "border-amber-300/25 bg-amber-400/20 text-amber-100",
+    colorClasses: "border-yellow-400/20 bg-yellow-500/10 text-yellow-100",
+    iconClasses: "border-yellow-300/30 bg-yellow-400/25 text-yellow-100",
     description: "Your taste archive is gaining depth.",
   },
   {
     id: "catalog_curator_3",
     name: "Catalog Curator III",
     minPoints: 50000,
-    icon: "catalog",
+    icon: "catalog_crown",
     tier: 3,
-    colorClasses: "border-amber-400/20 bg-amber-500/10 text-amber-100",
-    iconClasses: "border-amber-300/25 bg-amber-400/25 text-amber-50",
+    colorClasses: "border-yellow-400/20 bg-yellow-500/10 text-yellow-100",
+    iconClasses: "border-yellow-300/30 bg-yellow-400/30 text-yellow-50",
     description: "A serious and recognizable catalog is forming.",
   },
 
@@ -273,7 +276,7 @@ const USER_RANKS: Rank[] = [
     id: "sonic_visionary_3",
     name: "Sonic Visionary III",
     minPoints: 1150000,
-    icon: "wave",
+    icon: "vision_peak",
     tier: 3,
     colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
     iconClasses: "border-indigo-300/25 bg-indigo-400/25 text-indigo-50",
@@ -368,19 +371,37 @@ function RankIcon({ kind, tier }: { kind: RankIconKind; tier?: 1 | 2 | 3 }) {
         </>
       ) : null}
 
-      {kind === "catalog" ? (
+      {kind === "catalog_stack" ? (
         <>
-          <path d="M5 6h14" />
-          <path d="M5 11h14" />
-          <path d="M5 16h14" />
-          <path d="M7 6v10" />
-          {detailLevel >= 2 ? <path d="M12 6v10" /> : null}
-          {detailLevel >= 3 ? (
-            <>
-              <path d="M17 6v10" />
-              <path d="M4 20h16" />
-            </>
-          ) : null}
+          <path d="M6 7h12" />
+          <path d="M7 11h10" />
+          <path d="M8 15h8" />
+          <path d="M5 19h14" />
+          <circle cx="8" cy="7" r="1" />
+          <circle cx="16" cy="7" r="1" />
+        </>
+      ) : null}
+
+      {kind === "catalog_shelves" ? (
+        <>
+          <path d="M5 5v14" />
+          <path d="M19 5v14" />
+          <path d="M5 8h14" />
+          <path d="M5 14h14" />
+          <path d="M8 8v6" />
+          <path d="M12 8v6" />
+          <path d="M16 8v6" />
+          <path d="M9 19h6" />
+        </>
+      ) : null}
+
+      {kind === "catalog_crown" ? (
+        <>
+          <path d="M6 6h12v13H6z" />
+          <path d="M9 6V4h6v2" />
+          <path d="M9 11h6" />
+          <path d="M9 15h4" />
+          <path d="m8 3 2 2 2-3 2 3 2-2" />
         </>
       ) : null}
 
@@ -423,12 +444,19 @@ function RankIcon({ kind, tier }: { kind: RankIconKind; tier?: 1 | 2 | 3 }) {
           {detailLevel >= 2 ? (
             <path d="M4 10c2-5 4 5 6 0s4 5 6 0 3-2 4 0" />
           ) : null}
-          {detailLevel >= 3 ? (
-            <>
-              <path d="M4 5c2-4 4 4 6 0s4 4 6 0 3-1 4 0" />
-              <circle cx="12" cy="12" r="9" />
-            </>
-          ) : null}
+        </>
+      ) : null}
+
+      {kind === "vision_peak" ? (
+        <>
+          <path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" />
+          <circle cx="12" cy="12" r="2.2" />
+          <path d="M12 3v2" />
+          <path d="M12 19v2" />
+          <path d="M4.5 5.5 6 7" />
+          <path d="m18 7 1.5-1.5" />
+          <path d="M7 20 9 17" />
+          <path d="m15 17 2 3" />
         </>
       ) : null}
 
@@ -458,11 +486,7 @@ function RankIconBox({
     <div
       className={`relative flex shrink-0 items-center justify-center rounded-xl border ${
         size === "small" ? "h-10 w-10" : "h-11 w-11"
-      } ${
-        unlocked
-          ? rank.iconClasses
-          : "border-white/10 bg-white/[0.03] text-white/30"
-      }`}
+      } ${rank.iconClasses} ${unlocked ? "" : "opacity-45"}`}
     >
       <RankIcon kind={rank.icon} tier={rank.tier} />
 
@@ -496,6 +520,22 @@ export function ProfilePageClient({
   const unlockedBadges = BADGES.filter((badge) => badge.unlocked);
   const currentRank = useMemo(() => getCurrentRank(points), [points]);
   const nextRank = useMemo(() => getNextRank(points), [points]);
+
+  const rankProgressPercent = nextRank
+    ? Math.min(
+        100,
+        Math.max(
+          0,
+          ((points - currentRank.minPoints) /
+            (nextRank.minPoints - currentRank.minPoints)) *
+            100
+        )
+      )
+    : 100;
+
+  const pointsToNextRank = nextRank
+    ? Math.max(nextRank.minPoints - points, 0)
+    : 0;
 
   return (
     <main className="min-h-screen bg-[#05050d] text-white">
@@ -606,12 +646,12 @@ export function ProfilePageClient({
                 <button
                   type="button"
                   onClick={() => setIsRankModalOpen(true)}
-                  className="group rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2 text-center transition hover:border-white/10 hover:bg-white/[0.03]"
+                  className="rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2 text-center transition hover:border-white/10 hover:bg-white/[0.03]"
                 >
                   <p className="text-[9px] uppercase tracking-wider text-white/35">
                     Points
                   </p>
-                  <p className="mt-0.5 text-lg font-semibold tabular-nums text-white underline-offset-4 group-hover:underline group-hover:decoration-violet-300/70">
+                  <p className="mt-0.5 inline-block text-lg font-semibold tabular-nums text-white underline-offset-4 hover:underline hover:decoration-violet-300/70">
                     {points.toLocaleString()}
                   </p>
                 </button>
@@ -765,9 +805,6 @@ export function ProfilePageClient({
                 <h2 className="mt-1 text-2xl font-semibold tracking-tight text-white">
                   Point ranks
                 </h2>
-                <p className="mt-1 max-w-xl text-sm leading-relaxed text-white/45">
-                  Rank up by rating albums and tracks.
-                </p>
               </div>
 
               <button
@@ -780,64 +817,54 @@ export function ProfilePageClient({
             </div>
 
             <div className="border-b border-white/[0.06] px-5 py-4">
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-white/35">
-                    Current points
-                  </p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums text-white">
-                    {points.toLocaleString()}
-                  </p>
-                </div>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                <RankIconBox rank={currentRank} unlocked size="small" />
 
-                <div
-                  className={`rounded-2xl border p-3 ${currentRank.colorClasses}`}
-                >
-                  <p className="text-[10px] uppercase tracking-wider text-white/60">
-                    Current rank
-                  </p>
-                  <div className="mt-2 flex items-center gap-3">
-                    <RankIconBox rank={currentRank} unlocked size="small" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <p className="text-sm font-semibold text-white">
+                      <p className="text-[10px] uppercase tracking-wider text-white/35">
+                        Current rank
+                      </p>
+                      <p className="mt-0.5 text-sm font-semibold text-white">
                         {currentRank.name}
                       </p>
-                      <p className="mt-0.5 text-xs text-white/60">
-                        {currentRank.minPoints.toLocaleString()}+ points
+                    </div>
+
+                    <div className="text-left md:text-right">
+                      <p className="text-[10px] uppercase tracking-wider text-white/35">
+                        Points
+                      </p>
+                      <p className="mt-0.5 text-sm font-semibold tabular-nums text-white">
+                        {points.toLocaleString()}
                       </p>
                     </div>
                   </div>
-                </div>
 
-                <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-white/35">
-                    Next rank
-                  </p>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+                    <div
+                      className="h-full rounded-full bg-violet-400"
+                      style={{ width: `${rankProgressPercent}%` }}
+                    />
+                  </div>
 
-                  {nextRank ? (
-                    <>
-                      <p className="mt-1 text-sm font-semibold text-white">
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-white/40">
+                    <span>{currentRank.minPoints.toLocaleString()} pts</span>
+
+                    {nextRank ? (
+                      <span>
+                        {pointsToNextRank.toLocaleString()} pts to{" "}
                         {nextRank.name}
-                      </p>
-                      <p className="mt-0.5 text-xs text-white/45">
-                        {Math.max(
-                          nextRank.minPoints - points,
-                          0
-                        ).toLocaleString()}{" "}
-                        points to go
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="mt-1 text-sm font-semibold text-white">
-                        Max rank reached
-                      </p>
-                      <p className="mt-0.5 text-xs text-white/45">
-                        You are already at the top.
-                      </p>
-                    </>
-                  )}
+                      </span>
+                    ) : (
+                      <span>Max rank reached</span>
+                    )}
+                  </div>
                 </div>
+
+                {nextRank ? (
+                  <RankIconBox rank={nextRank} unlocked={false} size="small" />
+                ) : null}
               </div>
             </div>
 
