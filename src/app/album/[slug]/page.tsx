@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAlbum } from "@/lib/spotify";
+import { getMyRating, getMyRatings } from "@/lib/ratings";
+import { RatingControl } from "@/components/rating-control";
 
 function formatDuration(ms: number): string {
   const totalSeconds = Math.round(ms / 1000);
@@ -16,12 +18,22 @@ export default async function AlbumPage({
 }) {
   const { slug } = await params;
   const album = await getAlbum(slug);
-
   if (!album) {
     notFound();
   }
 
+  const artistText = album.artists.map((a) => a.name).join(", ");
+  const primaryArtist = album.artists[0];
+  const backHref = primaryArtist ? `/artist/${primaryArtist.id}` : "/search";
+  const backLabel = primaryArtist ? primaryArtist.name : "search";
+
   const albumArtistIds = new Set(album.artists.map((a) => a.id));
+  const trackIds = album.tracks.map((t) => t.id);
+
+  const [albumRating, trackRatings] = await Promise.all([
+    getMyRating("album", album.id),
+    getMyRatings("track", trackIds),
+  ]);
 
   return (
     <main className="min-h-screen bg-[#05050d] text-white">
@@ -36,10 +48,10 @@ export default async function AlbumPage({
 
       <div className="mx-auto w-full max-w-[900px] px-5 pb-24 pt-10 md:px-10">
         <Link
-          href="/search"
-          className="text-sm font-medium text-white/60 transition hover:text-white"
+          href={backHref}
+          className="truncate text-sm font-medium text-white/60 transition hover:text-white"
         >
-          ← Back to search
+          ← {backLabel}
         </Link>
 
         <header className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-end">
@@ -81,10 +93,22 @@ export default async function AlbumPage({
               {album.releaseYear}
               {album.totalTracks ? ` · ${album.totalTracks} tracks` : ""}
             </p>
+
+            <div className="mt-4">
+              <RatingControl
+                variant="prominent"
+                itemType="album"
+                itemId={album.id}
+                itemName={album.name}
+                itemArtist={artistText}
+                itemImageUrl={album.imageUrl}
+                initialScore={albumRating}
+              />
+            </div>
           </div>
         </header>
 
-        <section className="mt-8 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02]">
+        <section className="mt-8 rounded-2xl border border-white/[0.08] bg-white/[0.02]">
           <ul className="divide-y divide-white/[0.05]">
             {album.tracks.map((track) => {
               const features = track.artists.filter(
@@ -93,21 +117,24 @@ export default async function AlbumPage({
               return (
                 <li
                   key={track.id}
-                  className="flex items-center gap-4 px-4 py-3 transition hover:bg-white/[0.03]"
+                  className="flex items-center gap-3 px-4 py-3 transition hover:bg-white/[0.03]"
                 >
                   <span className="w-6 shrink-0 text-right text-sm tabular-nums text-white/35">
                     {track.trackNumber || "•"}
                   </span>
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-white/90">
+                    <Link
+                      href={`/track/${track.id}`}
+                      className="block truncate text-sm font-medium text-white/90 transition hover:text-violet-100 hover:underline"
+                    >
                       {track.name}
                       {track.explicit ? (
                         <span className="ml-2 align-middle rounded border border-white/15 px-1 text-[9px] font-semibold uppercase text-white/40">
                           E
                         </span>
                       ) : null}
-                    </p>
+                    </Link>
                     {features.length > 0 ? (
                       <p className="truncate text-xs text-white/40">
                         feat. {features.map((a) => a.name).join(", ")}
@@ -118,6 +145,16 @@ export default async function AlbumPage({
                   <span className="shrink-0 text-xs tabular-nums text-white/35">
                     {formatDuration(track.durationMs)}
                   </span>
+
+                  <RatingControl
+                    variant="compact"
+                    itemType="track"
+                    itemId={track.id}
+                    itemName={track.name}
+                    itemArtist={track.artists.map((a) => a.name).join(", ")}
+                    itemImageUrl={album.imageUrl}
+                    initialScore={trackRatings[track.id] ?? null}
+                  />
                 </li>
               );
             })}
