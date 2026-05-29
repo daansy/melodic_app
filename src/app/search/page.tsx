@@ -1,9 +1,40 @@
-"use client";
+import { NextResponse } from "next/server";
 
-import { useState } from "react";
-import Link from "next/link";
-
+const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
+const SPOTIFY_SEARCH_URL = "https://api.spotify.com/v1/search";
 const MIN_QUERY_LENGTH = 2;
+const EP_MIN_TRACKS = 4; // vanaf dit aantal nummers noemen we een 'single'-release een EP
+const PAGE_SIZE = 20; // Spotify's standaard paginagrootte (we mogen geen 'limit' sturen)
+const PAGES_TO_FETCH = 2; // aantal pagina's voor meer resultaten; verhoog dit voor nog meer
+
+type SpotifyTokenCache = {
+  accessToken: string;
+  expiresAt: number; // tijdstip in milliseconden waarop het token verloopt
+};
+
+type SpotifyArtist = { name: string };
+type SpotifyImage = { url: string };
+
+type SpotifyAlbumItem = {
+  id: string;
+  name: string;
+  album_type?: string;
+  total_tracks?: number;
+  artists?: SpotifyArtist[];
+  images?: SpotifyImage[];
+  release_date?: string;
+};
+
+type SpotifyTrackItem = {
+  id: string;
+  name: string;
+  artists?: SpotifyArtist[];
+  album?: {
+    name: string;
+    images?: SpotifyImage[];
+    release_date?: string;
+  };
+};
 
 type SearchResult = {
   id: string;
@@ -11,159 +42,193 @@ type SearchResult = {
   artist: string;
   imageUrl: string | null;
   releaseYear: string;
-  kind: string;
+  kind: string; // "Album" | "EP" | "Single" | "Compilation" | "Track"
 };
 
-export default function SearchPage() {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
+// Eenvoudige cache zodat we niet bij elke zoekopdracht een nieuw token ophalen.
+let cachedToken: SpotifyTokenCache | null = null;
 
-  async function handleSearch() {
-    const trimmed = query.trim();
-    if (trimmed.length < MIN_QUERY_LENGTH) {
-      return;
+async function getAccessToken(): Promise<string> {
+  const now = Date.now();
+  if (cachedToken && cachedToken.expiresAt > now + 5000) {
+    return cachedToken.accessToken;
+  }
+
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error("Spotify-credentials ontbreken in de environment variables.");
+  }
+
+  const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+  const response = await fetch(SPOTIFY_TOKEN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${basicAuth}`,
+    },
+    body: "grant_type=client_credentials",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    console.error("Spotify token failed:", response.status, detail);
+    throw new Error(`Kon geen Spotify-token ophalen (status ${response.status}).`);
+  }
+
+  const data = await response.json();
+
+  if (!data.access_token) {
+    console.error("Spotify token response zonder access_token:", data);
+    throw new Error("Spotify-token ontbreekt in het antwoord.");
+  }
+
+  cachedToken = {
+    accessToken: data.access_token,
+    expiresAt: now + data.expires_in * 1000,
+  };
+
+  return cachedToken.accessToken;
+}
+
+function albumKind(albumType: string | undefined, totalTracks: number): string {
+  if (albumType === "compilation") return "Compilation";
+  if (albumType === "single") return totalTracks >= EP_MIN_TRACKS ? "EP" : "Single";
+  return "Album";
+}
+
+function mapAlbum(album: SpotifyAlbumItem): SearchResult {
+  return {
+    id: album.id,
+    name: album.name,
+    artist: album.artists?.map((a) => a.name).join(", ") ?? "",
+    imageUrl: album.images?.[0]?.url ?? null,
+    releaseYear: album.release_date ? album.release_date.slice(0, 4) : "",
+    kind: albumKind(album.album_type, album.total_tracks ?? 0),
+  };
+}
+
+function mapTrack(track: SpotifyTrackItem): SearchResult {
+  return {
+    id: track.id,
+    name: track.name,
+    artist: track.artists?.map((a) => a.name).join(", ") ?? "",
+    imageUrl: track.album?.images?.[0]?.url ?? null,
+    releaseYear: track.album?.release_date
+      ? track.album.release_date.slice(0, 4)
+      : "",
+    kind: "Track",
+  };
+}
+
+function removeDuplicates(results: SearchResult[]): SearchResult[] {
+  const seen = new Set<string>();
+  const unique: SearchResult[] = [];
+  for (const result of results) {
+    const key = `${result.kind}|${result.name.toLowerCase()}|${result.artist.toLowerCase()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(result);
     }
+  }
+  return unique;
+}
 
-    setIsLoading(true);
-    setError(null);
+function matchesAllWords(result: SearchResult, queryWords: string[]): boolean {
+  const haystack = `${result.artist} ${result.name}`.toLowerCase();
+  return queryWords.every((word) => haystack.includes(word));
+}
 
-    try {
-      const response = await fetch(
-        `/api/spotify/search?q=${encodeURIComponent(trimmed)}`
-      );
-      const data = await response.json();
+async function fetchSearchPage(query: string, token: string, offset: number) {
+  const url = new URL(SPOTIFY_SEARCH_URL);
+  url.searchParams.set("q", query);
+  url.searchParams.set("type", "album,track");
+  if (offset > 0) {
+    url.searchParams.set("offset", String(offset));
+  }
 
-      if (!response.ok) {
-        throw new Error(data.error || "Er ging iets mis.");
-      }
+  const response = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
 
-      setResults(data.results ?? []);
-      setHasSearched(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Er ging iets mis.");
-      setResults([]);
-    } finally {
-      setIsLoading(false);
+  if (!response.ok) {
+    const detail = await response.text();
+    console.error("Spotify search failed:", response.status, "offset", offset, detail);
+    return null; // deze pagina overslaan, niet de hele zoekopdracht laten mislukken
+  }
+
+  const data = await response.json();
+  return {
+    albums: (data.albums?.items ?? []) as SpotifyAlbumItem[],
+    tracks: (data.tracks?.items ?? []) as SpotifyTrackItem[],
+  };
+}
+
+async function searchSpotify(query: string): Promise<SearchResult[]> {
+  const token = await getAccessToken();
+
+  // Meerdere pagina's tegelijk ophalen voor meer resultaten.
+  const offsets = Array.from({ length: PAGES_TO_FETCH }, (_, i) => i * PAGE_SIZE);
+  const pages = await Promise.all(
+    offsets.map((offset) => fetchSearchPage(query, token, offset))
+  );
+
+  // Mislukt zelfs de eerste pagina, dan is er echt iets mis.
+  if (pages[0] === null) {
+    throw new Error("Spotify-zoekopdracht mislukt.");
+  }
+
+  const albumItems: SpotifyAlbumItem[] = [];
+  const trackItems: SpotifyTrackItem[] = [];
+  for (const page of pages) {
+    if (page) {
+      albumItems.push(...page.albums);
+      trackItems.push(...page.tracks);
     }
   }
 
-  return (
-    <main className="min-h-screen bg-[#05050d] text-white">
-      <div
-        className="pointer-events-none fixed inset-0 -z-10"
-        aria-hidden
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,58,237,0.14), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(217,70,239,0.08), transparent), #05050d",
-        }}
-      />
+  const albums = albumItems.map(mapAlbum);
+  const tracks = trackItems.map(mapTrack);
 
-      <div className="mx-auto w-full max-w-[1100px] px-5 pb-24 pt-10 md:px-10">
-        <Link
-          href="/"
-          className="text-sm font-medium text-white/60 transition hover:text-white"
-        >
-          ← Back to Home
-        </Link>
-
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight md:text-4xl">
-          Search music
-        </h1>
-        <p className="mt-2 text-sm text-white/45">
-          Find an album, EP, single or track to rate. Powered by the Spotify
-          catalog.
-        </p>
-
-        <div className="mt-6 flex gap-3">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleSearch();
-            }}
-            placeholder="Search for an artist, album or track..."
-            className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm text-white placeholder-white/35 outline-none transition focus:border-violet-400/40 focus:bg-white/[0.06]"
-          />
-          <button
-            type="button"
-            onClick={handleSearch}
-            disabled={isLoading}
-            className="shrink-0 rounded-2xl border border-violet-400/30 bg-violet-500/15 px-5 py-3 text-sm font-medium text-violet-100 transition hover:bg-violet-500/25 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoading ? "Searching..." : "Search"}
-          </button>
-        </div>
-
-        {error ? (
-          <p className="mt-4 rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-            {error}
-          </p>
-        ) : null}
-
-        {results.length > 0 ? (
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {results.map((result) => (
-              <Link
-                key={`${result.kind}-${result.id}`}
-                href={
-                  result.kind === "Track"
-                    ? `/track/${result.id}`
-                    : `/album/${result.id}`
-                }
-                className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 transition hover:-translate-y-0.5 hover:border-violet-400/30 hover:bg-white/[0.04]"
-              >
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-white/[0.04]">
-                  {result.imageUrl ? (
-                    <img
-                      src={result.imageUrl}
-                      alt={result.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs text-white/25">
-                      No image
-                    </div>
-                  )}
-
-                  <span className="absolute left-2 top-2 rounded-full border border-white/10 bg-black/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/85 backdrop-blur-sm">
-                    {result.kind}
-                  </span>
-                </div>
-
-                <p className="mt-3 truncate text-sm font-semibold text-white">
-                  {result.name}
-                </p>
-                <p className="truncate text-xs text-white/45">{result.artist}</p>
-                <p className="mt-1 text-[11px] text-white/30">
-                  {result.releaseYear}
-                </p>
-              </Link>
-            ))}
-          </div>
-        ) : null}
-
-        {hasSearched && !isLoading && results.length === 0 && !error ? (
-          <div className="mt-8 rounded-2xl border border-dashed border-white/10 bg-black/20 p-8 text-center">
-            <p className="text-sm font-medium text-white/70">No results found</p>
-            <p className="mt-1 text-sm text-white/40">Try a different search.</p>
-          </div>
-        ) : null}
-
-        {!hasSearched && !isLoading ? (
-          <div className="mt-8 rounded-2xl border border-dashed border-white/10 bg-black/20 p-8 text-center">
-            <p className="text-sm font-medium text-white/70">
-              Start by searching for music
-            </p>
-            <p className="mt-1 text-sm text-white/40">
-              For example: an artist, an album title or a song.
-            </p>
-          </div>
-        ) : null}
-      </div>
-    </main>
+  // Singles weglaten waarvan hetzelfde nummer ook al als losse track terugkomt.
+  const trackSignatures = new Set(
+    tracks.map((t) => `${t.name.toLowerCase()}|${t.artist.toLowerCase()}`)
   );
+  const albumsWithoutRedundantSingles = albums.filter((album) => {
+    if (album.kind !== "Single") return true;
+    const signature = `${album.name.toLowerCase()}|${album.artist.toLowerCase()}`;
+    return !trackSignatures.has(signature);
+  });
+
+  // Releases eerst, daarna losse tracks; dubbele edities samenvoegen.
+  const combined = [...albumsWithoutRedundantSingles, ...tracks];
+  const unique = removeDuplicates(combined);
+
+  // Relevantiefilter: elk zoekwoord moet in de artiest of titel voorkomen.
+  const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const relevant = unique.filter((item) => matchesAllWords(item, queryWords));
+
+  return relevant.length > 0 ? relevant : unique;
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get("q")?.trim() ?? "";
+
+  if (query.length < MIN_QUERY_LENGTH) {
+    return NextResponse.json({ results: [] });
+  }
+
+  try {
+    const results = await searchSpotify(query);
+    return NextResponse.json({ results });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Onbekende fout";
+    console.error("Spotify search error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
