@@ -315,4 +315,27 @@ export async function getAlbum(id: string): Promise<AlbumDetail | null> {
 }
 
 export async function getTrack(id: string): Promise<TrackDetail | null> {
-  const data = await spotifyGet<TrackResponse>(`/tracks/$
+  const data = await spotifyGet<TrackResponse>(`/tracks/${id}`);
+  if (!data) return null;
+
+  const album = data.album
+    ? {
+        id: data.album.id,
+        name: data.album.name,
+        imageUrl: data.album.images?.[0]?.url ?? null,
+        releaseYear: data.album.release_date
+          ? data.album.release_date.slice(0, 4)
+          : "",
+      }
+    : null;
+
+  return {
+    id: data.id,
+    name: data.name,
+    durationMs: data.duration_ms ?? 0,
+    explicit: Boolean(data.explicit),
+    trackNumber: data.track_number ?? 0,
+    artists: (data.artists ?? []).map((a) => ({ id: a.id, name: a.name })),
+    album,
+  };
+}
