@@ -51,10 +51,18 @@ async function getAccessToken(): Promise<string> {
   });
 
   if (!response.ok) {
-    throw new Error("Kon geen Spotify-token ophalen.");
+    const detail = await response.text();
+    console.error("Spotify token failed:", response.status, detail);
+    throw new Error(`Kon geen Spotify-token ophalen (status ${response.status}).`);
   }
 
   const data = await response.json();
+
+  if (!data.access_token) {
+    console.error("Spotify token response zonder access_token:", data);
+    throw new Error("Spotify-token ontbreekt in het antwoord.");
+  }
+
   cachedToken = {
     accessToken: data.access_token,
     expiresAt: now + data.expires_in * 1000,
@@ -78,13 +86,14 @@ async function searchAlbums(query: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Spotify-zoekopdracht mislukt.");
+    const detail = await response.text();
+    console.error("Spotify search failed:", response.status, detail);
+    throw new Error(`Spotify-zoekopdracht mislukt (status ${response.status}).`);
   }
 
   const data = await response.json();
   const items: SpotifyAlbumItem[] = data.albums?.items ?? [];
 
-  // We sturen alleen de velden terug die we in de UI nodig hebben.
   return items.map((album) => ({
     id: album.id,
     name: album.name,
@@ -107,10 +116,8 @@ export async function GET(request: Request) {
     const albums = await searchAlbums(query);
     return NextResponse.json({ albums });
   } catch (error) {
-    console.error("Spotify search error:", error);
-    return NextResponse.json(
-      { error: "Er ging iets mis bij het zoeken." },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Onbekende fout";
+    console.error("Spotify search error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
