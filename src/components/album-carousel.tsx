@@ -3,8 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { AlbumSummary } from "@/lib/spotify";
+import { ScoreBadge } from "@/components/score-badge";
 
-function CarouselCard({ album }: { album: AlbumSummary }) {
+function CarouselCard({
+  album,
+  score,
+}: {
+  album: AlbumSummary;
+  score: number | null;
+}) {
   return (
     <Link
       href={`/album/${album.id}`}
@@ -27,6 +34,9 @@ function CarouselCard({ album }: { album: AlbumSummary }) {
         <span className="absolute left-2 top-2 rounded-full border border-white/10 bg-black/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/85 backdrop-blur-sm">
           {album.kind}
         </span>
+        {score !== null ? (
+          <ScoreBadge score={score} className="absolute bottom-2 right-2" />
+        ) : null}
       </div>
       <p className="mt-3 truncate text-sm font-semibold text-white group-hover:text-violet-100">
         {album.name}
@@ -39,7 +49,13 @@ function CarouselCard({ album }: { album: AlbumSummary }) {
   );
 }
 
-export function AlbumCarousel({ albums }: { albums: AlbumSummary[] }) {
+export function AlbumCarousel({
+  albums,
+  ratings,
+}: {
+  albums: AlbumSummary[];
+  ratings?: Record<string, number>;
+}) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
@@ -90,7 +106,11 @@ export function AlbumCarousel({ albums }: { albums: AlbumSummary[] }) {
         className="flex gap-4 overflow-x-auto scroll-smooth snap-x pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {albums.map((album) => (
-          <CarouselCard key={album.id} album={album} />
+          <CarouselCard
+            key={album.id}
+            album={album}
+            score={ratings?.[album.id] ?? null}
+          />
         ))}
       </div>
 
