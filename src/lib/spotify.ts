@@ -215,33 +215,40 @@ function sortByReleaseDesc(items: AlbumSummary[]): AlbumSummary[] {
 }
 
 // De 'artist albums'-endpoint is geblokkeerd voor dev-apps, dus we halen de
-// releases via de zoek-endpoint op (die werkt wel) en filteren op de artiest.
+// releases via de zoek-endpoint op (die werkt wel). We zoeken op de artiestnaam
+// (net als de zoekpagina) en houden alles wat van deze artiest is: of de
+// artiest-ID matcht, of de naam komt in de credits voor.
+function albumBelongsToArtist(
+  item: AlbumItemResponse,
+  artistId: string,
+  artistName: string
+): boolean {
+  const artists = item.artists ?? [];
+  if (artists.some((a) => a.id === artistId)) return true;
+
+  const credited = artists.map((a) => a.name).join(" ").toLowerCase();
+  const words = artistName.toLowerCase().split(/\s+/).filter(Boolean);
+  return words.length > 0 && words.every((word) => credited.includes(word));
+}
+
 async function fetchArtistAlbumsViaSearch(
   artistId: string,
   artistName: string,
   maxPages: number
 ): Promise<AlbumItemResponse[]> {
-  const all: AlbumItemResponse[] = [];
+  // Alle pagina's tegelijk ophalen (sneller) — net als de zoekpagina doet.
+  const offsets = Array.from({ length: maxPages }, (_, i) => i * PAGE_SIZE);
 
-  for (let page = 0; page < maxPages; page++) {
-    const params = new URLSearchParams({ q: 'artist:"' + artistName + '"', type: "album" });
-    const offset = page * PAGE_SIZE;
-    if (offset > 0) params.set("offset", String(offset));
-
-    const data = await spotifyGet<SearchAlbumsResponse>(
-      `/search?${params.toString()}`
-    );
-
-    const items = data?.albums?.items ?? [];
-    if (items.length === 0) break;
-    all.push(...items);
-    if (!data?.albums?.next) break;
-  }
-
-  // Alleen releases van déze artiest houden (zoeken geeft soms anderen terug).
-  return all.filter((item) =>
-    (item.artists ?? []).some((a) => a.id === artistId)
+  const pages = await Promise.all(
+    offsets.map((offset) => {
+      const params = new URLSearchParams({ q: artistName, type: "album" });
+      if (offset > 0) params.set("offset", String(offset));
+      return spotifyGet<SearchAlbumsResponse>("/search?" + params.toString());
+    })
   );
+
+  const all = pages.flatMap((data) => data?.albums?.items ?? []);
+  return all.filter((item) => albumBelongsToArtist(item, artistId, artistName));
 }
 
 export async function getArtist(id: string): Promise<Artist | null> {
