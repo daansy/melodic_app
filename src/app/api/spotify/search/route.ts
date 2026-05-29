@@ -77,8 +77,6 @@ async function searchAlbums(query: string) {
   const url = new URL(SPOTIFY_SEARCH_URL);
   url.searchParams.set("q", query);
   url.searchParams.set("type", "album");
-  url.searchParams.set("limit", String(SEARCH_RESULT_LIMIT));
-  url.searchParams.set("market", SEARCH_MARKET);
 
   console.log("Spotify search URL:", url.toString());
 
