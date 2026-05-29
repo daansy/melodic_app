@@ -191,7 +191,10 @@ async function fetchAlbumGroup(
   const all: AlbumItemResponse[] = [];
 
   for (let page = 0; page < maxPages; page++) {
-    const params = new URLSearchParams({ include_groups: includeGroups });
+const params = new URLSearchParams({
+      include_groups: includeGroups,
+      market: SPOTIFY_MARKET,
+    });
     const offset = page * ALBUM_PAGE_SIZE;
     if (offset > 0) {
       params.set("offset", String(offset));
