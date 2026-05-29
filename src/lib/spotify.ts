@@ -2,7 +2,7 @@ const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_API_BASE = "https://api.spotify.com/v1";
 const EP_MIN_TRACKS = 3; // album_type 'single' met >= dit aantal nummers tonen we als EP
 const PAGE_SIZE = 20; // Spotify's standaard paginagrootte; we sturen GEEN 'limit'
-const RELEASE_MAX_PAGES = 25; // ruime grens zodat de hele discografie meekomt
+const ARTIST_SEARCH_PAGES = 6; // aantal zoekpagina's voor de discografie van een artiest
 const TRACK_MAX_PAGES = 10; // veiligheidsgrens voor lange tracklijsten
 
 type SpotifyTokenCache = { accessToken: string; expiresAt: number };
@@ -25,7 +25,9 @@ type AlbumItemResponse = {
   artists?: SpotifyArtistRef[];
 };
 
-type ArtistAlbumsResponse = { items?: AlbumItemResponse[]; next?: string | null };
+type SearchAlbumsResponse = {
+  albums?: { items?: AlbumItemResponse[]; next?: string | null };
+};
 
 type TrackItemResponse = {
   id: string;
@@ -212,26 +214,34 @@ function sortByReleaseDesc(items: AlbumSummary[]): AlbumSummary[] {
   return [...items].sort((a, b) => (a.releaseDate < b.releaseDate ? 1 : -1));
 }
 
-async function fetchAllReleases(artistId: string): Promise<AlbumItemResponse[]> {
+// De 'artist albums'-endpoint is geblokkeerd voor dev-apps, dus we halen de
+// releases via de zoek-endpoint op (die werkt wel) en filteren op de artiest.
+async function fetchArtistAlbumsViaSearch(
+  artistId: string,
+  artistName: string,
+  maxPages: number
+): Promise<AlbumItemResponse[]> {
   const all: AlbumItemResponse[] = [];
 
-  for (let page = 0; page < RELEASE_MAX_PAGES; page++) {
-    const params = new URLSearchParams({
-      include_groups: "album,single,compilation",
-    });
+  for (let page = 0; page < maxPages; page++) {
+    const params = new URLSearchParams({ q: artistName, type: "album" });
     const offset = page * PAGE_SIZE;
     if (offset > 0) params.set("offset", String(offset));
 
-    const data = await spotifyGet<ArtistAlbumsResponse>(
-      `/artists/${artistId}/albums?${params.toString()}`
+    const data = await spotifyGet<SearchAlbumsResponse>(
+      `/search?${params.toString()}`
     );
 
-    if (!data || !Array.isArray(data.items) || data.items.length === 0) break;
-    all.push(...data.items);
-    if (!data.next) break; // geen volgende pagina meer
+    const items = data?.albums?.items ?? [];
+    if (items.length === 0) break;
+    all.push(...items);
+    if (!data?.albums?.next) break;
   }
 
-  return all;
+  // Alleen releases van déze artiest houden (zoeken geeft soms anderen terug).
+  return all.filter((item) =>
+    (item.artists ?? []).some((a) => a.id === artistId)
+  );
 }
 
 export async function getArtist(id: string): Promise<Artist | null> {
@@ -245,9 +255,10 @@ export async function getArtist(id: string): Promise<Artist | null> {
 }
 
 export async function getArtistReleases(
-  id: string
+  id: string,
+  name: string
 ): Promise<{ albums: AlbumSummary[]; singles: AlbumSummary[] }> {
-  const items = await fetchAllReleases(id);
+  const items = await fetchArtistAlbumsViaSearch(id, name, ARTIST_SEARCH_PAGES);
   const mapped = dedupeByName(items.map(mapAlbumSummary));
 
   // Zelf indelen op basis van het type, niet op Spotify's groepering.
@@ -304,27 +315,4 @@ export async function getAlbum(id: string): Promise<AlbumDetail | null> {
 }
 
 export async function getTrack(id: string): Promise<TrackDetail | null> {
-  const data = await spotifyGet<TrackResponse>(`/tracks/${id}`);
-  if (!data) return null;
-
-  const album = data.album
-    ? {
-        id: data.album.id,
-        name: data.album.name,
-        imageUrl: data.album.images?.[0]?.url ?? null,
-        releaseYear: data.album.release_date
-          ? data.album.release_date.slice(0, 4)
-          : "",
-      }
-    : null;
-
-  return {
-    id: data.id,
-    name: data.name,
-    durationMs: data.duration_ms ?? 0,
-    explicit: Boolean(data.explicit),
-    trackNumber: data.track_number ?? 0,
-    artists: (data.artists ?? []).map((a) => ({ id: a.id, name: a.name })),
-    album,
-  };
-}
+  const data = await spotifyGet<TrackResponse>(`/tracks/$
