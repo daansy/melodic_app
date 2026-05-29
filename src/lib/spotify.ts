@@ -2,7 +2,7 @@ const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_API_BASE = "https://api.spotify.com/v1";
 const EP_MIN_TRACKS = 3; // album_type 'single' met >= dit aantal nummers tonen we als EP
 const PAGE_SIZE = 20; // Spotify's standaard paginagrootte; we sturen GEEN 'limit'
-const ARTIST_SEARCH_PAGES = 6; // aantal zoekpagina's voor de discografie van een artiest
+const ARTIST_SEARCH_PAGES = 12; // aantal zoekpagina's voor de discografie van een artiest
 const TRACK_MAX_PAGES = 10; // veiligheidsgrens voor lange tracklijsten
 
 type SpotifyTokenCache = { accessToken: string; expiresAt: number };
@@ -224,7 +224,7 @@ async function fetchArtistAlbumsViaSearch(
   const all: AlbumItemResponse[] = [];
 
   for (let page = 0; page < maxPages; page++) {
-    const params = new URLSearchParams({ q: artistName, type: "album" });
+    const params = new URLSearchParams({ q: 'artist:"' + artistName + '"', type: "album" });
     const offset = page * PAGE_SIZE;
     if (offset > 0) params.set("offset", String(offset));
 
