@@ -1,10 +1,8 @@
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_API_BASE = "https://api.spotify.com/v1";
 const EP_MIN_TRACKS = 3; // album_type 'single' met >= dit aantal nummers tonen we als EP
-const SPOTIFY_MARKET = "US"; // één markt => één vermelding per album i.p.v. duplicaten per land
-const ALBUM_PAGE_SIZE = 20; // Spotify's standaard; we sturen GEEN 'limit'
-const ALBUM_GROUP_MAX_PAGES = 10; // veiligheidsgrens voor albums (20 per pagina)
-const SINGLE_GROUP_MAX_PAGES = 6; // veiligheidsgrens voor singles/EP's
+const PAGE_SIZE = 20; // Spotify's standaard paginagrootte; we sturen GEEN 'limit'
+const RELEASE_MAX_PAGES = 25; // ruime grens zodat de hele discografie meekomt
 const TRACK_MAX_PAGES = 10; // veiligheidsgrens voor lange tracklijsten
 
 type SpotifyTokenCache = { accessToken: string; expiresAt: number };
@@ -52,6 +50,21 @@ type AlbumResponse = {
 
 type AlbumTracksResponse = { items?: TrackItemResponse[]; next?: string | null };
 
+type TrackResponse = {
+  id: string;
+  name: string;
+  duration_ms?: number;
+  explicit?: boolean;
+  track_number?: number;
+  artists?: SpotifyArtistRef[];
+  album?: {
+    id: string;
+    name: string;
+    images?: SpotifyImage[];
+    release_date?: string;
+  };
+};
+
 export type Artist = { id: string; name: string; imageUrl: string | null };
 
 export type AlbumSummary = {
@@ -85,6 +98,21 @@ export type AlbumDetail = {
   tracks: AlbumTrack[];
 };
 
+export type TrackDetail = {
+  id: string;
+  name: string;
+  durationMs: number;
+  explicit: boolean;
+  trackNumber: number;
+  artists: { id: string; name: string }[];
+  album: {
+    id: string;
+    name: string;
+    imageUrl: string | null;
+    releaseYear: string;
+  } | null;
+};
+
 let cachedToken: SpotifyTokenCache | null = null;
 
 async function getAccessToken(): Promise<string> {
@@ -95,7 +123,6 @@ async function getAccessToken(): Promise<string> {
 
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-
   if (!clientId || !clientSecret) {
     throw new Error("Spotify-credentials ontbreken in de environment variables.");
   }
@@ -166,11 +193,13 @@ function mapAlbumSummary(item: AlbumItemResponse): AlbumSummary {
   };
 }
 
+// Ontdubbelen op type + naam: zo voegen we markt-duplicaten (zelfde naam) samen,
+// maar houden we een album en een gelijknamige single apart.
 function dedupeByName(items: AlbumSummary[]): AlbumSummary[] {
   const seen = new Set<string>();
   const unique: AlbumSummary[] = [];
   for (const item of items) {
-    const key = item.name.trim().toLowerCase();
+    const key = `${item.kind}|${item.name.trim().toLowerCase()}`;
     if (!seen.has(key)) {
       seen.add(key);
       unique.push(item);
@@ -183,22 +212,15 @@ function sortByReleaseDesc(items: AlbumSummary[]): AlbumSummary[] {
   return [...items].sort((a, b) => (a.releaseDate < b.releaseDate ? 1 : -1));
 }
 
-async function fetchAlbumGroup(
-  artistId: string,
-  includeGroups: string,
-  maxPages: number
-): Promise<AlbumItemResponse[]> {
+async function fetchAllReleases(artistId: string): Promise<AlbumItemResponse[]> {
   const all: AlbumItemResponse[] = [];
 
-  for (let page = 0; page < maxPages; page++) {
-const params = new URLSearchParams({
-      include_groups: includeGroups,
-      market: SPOTIFY_MARKET,
+  for (let page = 0; page < RELEASE_MAX_PAGES; page++) {
+    const params = new URLSearchParams({
+      include_groups: "album,single,compilation",
     });
-    const offset = page * ALBUM_PAGE_SIZE;
-    if (offset > 0) {
-      params.set("offset", String(offset));
-    }
+    const offset = page * PAGE_SIZE;
+    if (offset > 0) params.set("offset", String(offset));
 
     const data = await spotifyGet<ArtistAlbumsResponse>(
       `/artists/${artistId}/albums?${params.toString()}`
@@ -225,14 +247,16 @@ export async function getArtist(id: string): Promise<Artist | null> {
 export async function getArtistReleases(
   id: string
 ): Promise<{ albums: AlbumSummary[]; singles: AlbumSummary[] }> {
-  // Albums en singles apart ophalen, zodat veel singles de albums niet wegdrukken.
-  const [albumItems, singleItems] = await Promise.all([
-    fetchAlbumGroup(id, "album,compilation", ALBUM_GROUP_MAX_PAGES),
-    fetchAlbumGroup(id, "single", SINGLE_GROUP_MAX_PAGES),
-  ]);
+  const items = await fetchAllReleases(id);
+  const mapped = dedupeByName(items.map(mapAlbumSummary));
 
-  const albums = sortByReleaseDesc(dedupeByName(albumItems.map(mapAlbumSummary)));
-  const singles = sortByReleaseDesc(dedupeByName(singleItems.map(mapAlbumSummary)));
+  // Zelf indelen op basis van het type, niet op Spotify's groepering.
+  const albums = sortByReleaseDesc(
+    mapped.filter((a) => a.kind === "Album" || a.kind === "Compilation")
+  );
+  const singles = sortByReleaseDesc(
+    mapped.filter((a) => a.kind === "EP" || a.kind === "Single")
+  );
 
   return { albums, singles };
 }
@@ -256,7 +280,6 @@ export async function getAlbum(id: string): Promise<AlbumDetail | null> {
   let trackItems: TrackItemResponse[] = data.tracks?.items ?? [];
   const total = data.tracks?.total ?? trackItems.length;
 
-  // Lange albums (> standaard pagina) verder ophalen zonder 'limit'.
   let guard = 0;
   while (trackItems.length < total && guard < TRACK_MAX_PAGES) {
     const params = new URLSearchParams({ offset: String(trackItems.length) });
@@ -279,38 +302,6 @@ export async function getAlbum(id: string): Promise<AlbumDetail | null> {
     tracks: trackItems.map(mapTrack),
   };
 }
-
-// ---- Track (single) ----
-
-type TrackResponse = {
-  id: string;
-  name: string;
-  duration_ms?: number;
-  explicit?: boolean;
-  track_number?: number;
-  artists?: SpotifyArtistRef[];
-  album?: {
-    id: string;
-    name: string;
-    images?: SpotifyImage[];
-    release_date?: string;
-  };
-};
-
-export type TrackDetail = {
-  id: string;
-  name: string;
-  durationMs: number;
-  explicit: boolean;
-  trackNumber: number;
-  artists: { id: string; name: string }[];
-  album: {
-    id: string;
-    name: string;
-    imageUrl: string | null;
-    releaseYear: string;
-  } | null;
-};
 
 export async function getTrack(id: string): Promise<TrackDetail | null> {
   const data = await spotifyGet<TrackResponse>(`/tracks/${id}`);
