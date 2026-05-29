@@ -41,7 +41,7 @@ function ProfileCard({ profile }: { profile: HomeProfile }) {
 
   const badgeTitle = featuredBadge
     ? unlockedLabel
-      ? `${featuredBadge.name} — unlocked ${unlockedLabel}`
+      ? `${featuredBadge.name}, unlocked ${unlockedLabel}`
       : featuredBadge.name
     : "";
 
@@ -69,11 +69,27 @@ function ProfileCard({ profile }: { profile: HomeProfile }) {
 
                 {featuredBadge ? (
                   <span
-                    className="shrink-0 text-sm leading-none text-violet-300"
-                    title={badgeTitle}
+                    role="img"
                     aria-label={badgeTitle}
+                    className="group/badge relative shrink-0 leading-none"
                   >
-                    {featuredBadge.symbol}
+                    <span aria-hidden className="text-sm text-violet-300">
+                      {featuredBadge.symbol}
+                    </span>
+
+                    <span className="pointer-events-none absolute left-1/2 top-full z-30 mt-2 hidden w-max -translate-x-1/2 group-hover/badge:block">
+                      <span className="relative block rounded-xl border border-white/10 bg-[#0b0b14] px-3 py-2 text-left shadow-[0_18px_50px_-20px_rgba(124,58,237,0.65)]">
+                        <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-l border-t border-white/10 bg-[#0b0b14]" />
+                        <span className="block whitespace-nowrap text-xs font-semibold text-white">
+                          {featuredBadge.name}
+                        </span>
+                        {unlockedLabel ? (
+                          <span className="mt-0.5 block whitespace-nowrap text-[10px] text-white/40">
+                            Unlocked {unlockedLabel}
+                          </span>
+                        ) : null}
+                      </span>
+                    </span>
                   </span>
                 ) : null}
               </div>
@@ -143,18 +159,4 @@ function NetworkEmpty() {
   );
 }
 
-export function RightRail({
-  profile,
-}: {
-  profile: HomeProfile;
-  activity?: Activity[];
-  onEditProfile?: () => void;
-}) {
-  return (
-    <aside className="space-y-10 lg:sticky lg:top-8 lg:max-h-[calc(100vh-7rem)] lg:space-y-12 lg:overflow-y-auto lg:pb-4">
-      <ProfileCard profile={profile} />
-      <RecentRatingsEmpty />
-      <NetworkEmpty />
-    </aside>
-  );
-}
+exp
