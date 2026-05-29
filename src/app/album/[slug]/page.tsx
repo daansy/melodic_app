@@ -28,12 +28,17 @@ export default async function AlbumPage({
   const backHref = primaryArtist ? `/artist/${primaryArtist.id}` : "/search";
   const backLabel = primaryArtist ? primaryArtist.name : "search";
 
+  // Singles krijgen geen per-track rating; alleen albums, EP's en compilations wel.
+  const showTrackRating = album.kind !== "Single";
+  const rateLabel =
+    album.kind === "EP" ? "Rate EP" : `Rate ${album.kind.toLowerCase()}`;
+
   const albumArtistIds = new Set(album.artists.map((a) => a.id));
   const trackIds = album.tracks.map((t) => t.id);
 
   const [albumRating, trackRatings] = await Promise.all([
     getMyRating("album", album.id),
-    getMyRatings("track", trackIds),
+    showTrackRating ? getMyRatings("track", trackIds) : Promise.resolve({}),
   ]);
 
   return (
@@ -107,6 +112,7 @@ export default async function AlbumPage({
               itemArtist={artistText}
               itemImageUrl={album.imageUrl}
               initialScore={albumRating}
+              label={rateLabel}
             />
           </div>
         </header>
@@ -149,13 +155,15 @@ export default async function AlbumPage({
                     {formatDuration(track.durationMs)}
                   </span>
 
-                  <TrackRatingSlider
-                    itemId={track.id}
-                    itemName={track.name}
-                    itemArtist={track.artists.map((a) => a.name).join(", ")}
-                    itemImageUrl={album.imageUrl}
-                    initialScore={trackRatings[track.id] ?? null}
-                  />
+                  {showTrackRating ? (
+                    <TrackRatingSlider
+                      itemId={track.id}
+                      itemName={track.name}
+                      itemArtist={track.artists.map((a) => a.name).join(", ")}
+                      itemImageUrl={album.imageUrl}
+                      initialScore={trackRatings[track.id] ?? null}
+                    />
+                  ) : null}
                 </li>
               );
             })}
