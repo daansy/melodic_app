@@ -11,6 +11,7 @@ const FILTERS = [
   { id: "eps", label: "EPs" },
   { id: "tracks", label: "Tracks" },
   { id: "artists", label: "Artists" },
+  { id: "users", label: "Users" },
 ];
 
 type ResultArtist = { id: string; name: string };
@@ -22,6 +23,14 @@ type SearchResult = {
   imageUrl: string | null;
   releaseYear: string;
   kind: string;
+  username?: string; // alleen voor User-resultaten
+};
+
+type ApiUser = {
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  badgeId: string | null;
 };
 
 function matchesFilter(kind: string, filter: string): boolean {
@@ -30,10 +39,12 @@ function matchesFilter(kind: string, filter: string): boolean {
   if (filter === "eps") return kind === "EP";
   if (filter === "tracks") return kind === "Track";
   if (filter === "artists") return kind === "Artist";
+  if (filter === "users") return kind === "User";
   return true;
 }
 
 function detailHref(result: SearchResult): string {
+  if (result.kind === "User") return `/u/${result.username ?? result.id}`;
   if (result.kind === "Artist") return `/artist/${result.id}`;
   if (result.kind === "Track") return `/track/${result.id}`;
   return `/album/${result.id}`;
@@ -57,16 +68,33 @@ export default function SearchPage() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/spotify/search?q=${encodeURIComponent(trimmed)}`
-      );
-      const data = await response.json();
+      const [musicRes, usersRes] = await Promise.all([
+        fetch(`/api/spotify/search?q=${encodeURIComponent(trimmed)}`),
+        fetch(`/api/users/search?q=${encodeURIComponent(trimmed)}`),
+      ]);
 
-      if (!response.ok) {
-        throw new Error(data.error || "Er ging iets mis.");
+      const musicData = await musicRes.json();
+      if (!musicRes.ok) {
+        throw new Error(musicData.error || "Er ging iets mis.");
+      }
+      const musicResults: SearchResult[] = musicData.results ?? [];
+
+      // Gebruikers zijn 'best effort': als dat misgaat tonen we gewoon de muziek.
+      let userResults: SearchResult[] = [];
+      if (usersRes.ok) {
+        const usersData = await usersRes.json();
+        userResults = (usersData.users ?? []).map((u: ApiUser) => ({
+          id: u.username,
+          name: u.displayName,
+          artists: [],
+          imageUrl: u.avatarUrl,
+          releaseYear: "",
+          kind: "User",
+          username: u.username,
+        }));
       }
 
-      setResults(data.results ?? []);
+      setResults([...userResults, ...musicResults]);
       setActiveFilter("all");
       setHasSearched(true);
     } catch (err) {
@@ -102,8 +130,7 @@ export default function SearchPage() {
           Search music
         </h1>
         <p className="mt-2 text-sm text-white/45">
-          Find albums, EPs, tracks and artists to rate. Powered by the Spotify
-          catalog.
+          Find albums, EPs, tracks, artists and people to follow.
         </p>
 
         <div className="mt-6 flex gap-3">
@@ -114,7 +141,7 @@ export default function SearchPage() {
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSearch();
             }}
-            placeholder="Search for an artist, album or track..."
+            placeholder="Search for an artist, album, track or user..."
             className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm text-white placeholder-white/35 outline-none transition focus:border-violet-400/40 focus:bg-white/[0.06]"
           />
           <button
@@ -156,6 +183,8 @@ export default function SearchPage() {
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {visibleResults.map((result) => {
               const isArtist = result.kind === "Artist";
+              const isUser = result.kind === "User";
+              const isRound = isArtist || isUser;
               const href = detailHref(result);
               return (
                 <div
@@ -166,7 +195,7 @@ export default function SearchPage() {
                     <div className="relative">
                       <div
                         className={`aspect-square w-full overflow-hidden bg-white/[0.04] ${
-                          isArtist ? "rounded-full" : "rounded-xl"
+                          isRound ? "rounded-full" : "rounded-xl"
                         }`}
                       >
                         {result.imageUrl ? (
@@ -175,6 +204,10 @@ export default function SearchPage() {
                             alt={result.name}
                             className="h-full w-full object-cover transition group-hover:scale-105"
                           />
+                        ) : isUser ? (
+                          <div className="flex h-full w-full items-center justify-center bg-violet-500/10 text-2xl font-semibold text-violet-200">
+                            {(result.name?.[0] || "U").toUpperCase()}
+                          </div>
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-xs text-white/25">
                             No image
@@ -194,7 +227,11 @@ export default function SearchPage() {
                     {result.name}
                   </Link>
 
-                  {!isArtist && result.artists.length > 0 ? (
+                  {isUser ? (
+                    <p className="truncate text-xs text-white/45">
+                      @{result.username}
+                    </p>
+                  ) : !isArtist && result.artists.length > 0 ? (
                     <p className="truncate text-xs text-white/45">
                       {result.artists.map((a, i) => (
                         <span key={a.id}>
@@ -245,10 +282,10 @@ export default function SearchPage() {
         {!hasSearched && !isLoading ? (
           <div className="mt-8 rounded-2xl border border-dashed border-white/10 bg-black/20 p-8 text-center">
             <p className="text-sm font-medium text-white/70">
-              Start by searching for music
+              Start by searching
             </p>
             <p className="mt-1 text-sm text-white/40">
-              For example: an artist, an album title or a song.
+              For example: an artist, an album, a song or a username.
             </p>
           </div>
         ) : null}
