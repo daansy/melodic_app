@@ -38,7 +38,9 @@ export default async function AlbumPage({
 
   const [albumRating, trackRatings] = await Promise.all([
     getMyRating("album", album.id),
-    showTrackRating ? getMyRatings("track", trackIds) : Promise.resolve({}),
+    showTrackRating
+      ? getMyRatings("track", trackIds)
+      : Promise.resolve({} as Record<string, number>),
   ]);
 
   return (
