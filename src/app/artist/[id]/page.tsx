@@ -1,41 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getArtist, getArtistReleases, type AlbumSummary } from "@/lib/spotify";
-
-function AlbumCard({ album }: { album: AlbumSummary }) {
-  return (
-    <Link
-      href={`/album/${album.id}`}
-      className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 transition hover:border-violet-400/30 hover:bg-white/[0.04]"
-    >
-      <div className="relative">
-        <div className="aspect-square w-full overflow-hidden rounded-xl bg-white/[0.04]">
-          {album.imageUrl ? (
-            <img
-              src={album.imageUrl}
-              alt={album.name}
-              className="h-full w-full object-cover transition group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs text-white/25">
-              No image
-            </div>
-          )}
-        </div>
-        <span className="absolute left-2 top-2 rounded-full border border-white/10 bg-black/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/85 backdrop-blur-sm">
-          {album.kind}
-        </span>
-      </div>
-      <p className="mt-3 truncate text-sm font-semibold text-white group-hover:text-violet-100">
-        {album.name}
-      </p>
-      <p className="mt-1 text-[11px] text-white/30">
-        {album.releaseYear}
-        {album.totalTracks ? ` · ${album.totalTracks} tracks` : ""}
-      </p>
-    </Link>
-  );
-}
+import { getArtist, getArtistReleases } from "@/lib/spotify";
+import { AlbumCarousel } from "@/components/album-carousel";
 
 export default async function ArtistPage({
   params,
@@ -104,12 +70,9 @@ export default async function ArtistPage({
 
         <section className="mt-10">
           <h2 className="text-lg font-semibold tracking-tight">Albums</h2>
-
           {albums.length > 0 ? (
-            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {albums.map((album) => (
-                <AlbumCard key={album.id} album={album} />
-              ))}
+            <div className="mt-4">
+              <AlbumCarousel albums={albums} />
             </div>
           ) : (
             <div className="mt-4 rounded-2xl border border-dashed border-white/10 bg-black/20 p-8 text-center">
@@ -124,10 +87,8 @@ export default async function ArtistPage({
         {singles.length > 0 ? (
           <section className="mt-10">
             <h2 className="text-lg font-semibold tracking-tight">Singles &amp; EPs</h2>
-            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {singles.map((album) => (
-                <AlbumCard key={album.id} album={album} />
-              ))}
+            <div className="mt-4">
+              <AlbumCarousel albums={singles} />
             </div>
           </section>
         ) : null}
