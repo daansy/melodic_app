@@ -9,25 +9,28 @@ import { yourRecentRatings } from "@/lib/data";
 import { albumSlug } from "@/lib/slug";
 import type { Activity, RecentRating } from "@/lib/types";
 
+const BADGES: Record<string, { name: string; symbol: string }> = {
+  early_member: { name: "Early Member", symbol: "✦" },
+};
+
 type HomeProfile = {
   username: string | null;
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  featured_badge_id?: string | null;
   onboarding_completed: boolean | null;
 };
 
-function ProfileCard({
-  profile,
-  onEdit,
-}: {
-  profile: HomeProfile;
-  onEdit: () => void;
-}) {
+function ProfileCard({ profile }: { profile: HomeProfile }) {
   const displayName = profile.display_name || profile.username || "Melodic User";
   const username = profile.username || "user";
   const avatarInitial =
     displayName?.[0]?.toUpperCase() || username?.[0]?.toUpperCase() || "M";
+
+  const featuredBadge = profile.featured_badge_id
+    ? BADGES[profile.featured_badge_id] ?? null
+    : null;
 
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
@@ -50,17 +53,23 @@ function ProfileCard({
                 {displayName}
               </p>
               <p className="truncate text-xs text-white/40">@{username}</p>
+
+              {featuredBadge ? (
+                <span className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-violet-300/30 bg-violet-500/15 px-2 py-0.5 text-[11px] font-medium text-violet-100">
+                  <span aria-hidden>{featuredBadge.symbol}</span>
+                  {featuredBadge.name}
+                </span>
+              ) : null}
             </div>
           </Link>
         </DropdownMenu>
 
-        <button
-          type="button"
-          onClick={onEdit}
-          className="text-xs font-medium text-violet-300/90 transition hover:text-violet-200"
+        <Link
+          href="/settings"
+          className="shrink-0 text-xs font-medium text-violet-300/90 transition hover:text-violet-200"
         >
           Edit
-        </button>
+        </Link>
       </div>
 
       <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-white/45">
@@ -185,15 +194,14 @@ function NetworkActivity({ items }: { items: Activity[] }) {
 export function RightRail({
   activity,
   profile,
-  onEditProfile,
 }: {
   activity: Activity[];
   profile: HomeProfile;
-  onEditProfile: () => void;
+  onEditProfile?: () => void;
 }) {
   return (
     <aside className="space-y-10 lg:sticky lg:top-8 lg:max-h-[calc(100vh-7rem)] lg:space-y-12 lg:overflow-y-auto lg:pb-4">
-      <ProfileCard profile={profile} onEdit={onEditProfile} />
+      <ProfileCard profile={profile} />
       <RecentRatingsList items={yourRecentRatings} />
       <NetworkActivity items={activity} />
     </aside>
