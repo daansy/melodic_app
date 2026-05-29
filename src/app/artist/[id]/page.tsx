@@ -11,16 +11,12 @@ export default async function ArtistPage({
 }) {
   const { id } = await params;
 
-  const [artist, releases] = await Promise.all([
-    getArtist(id),
-    getArtistReleases(id),
-  ]);
-
+const artist = await getArtist(id);
   if (!artist) {
     notFound();
   }
 
-  const { albums, singles } = releases;
+  const { albums, singles } = await getArtistReleases(id, artist.name);
 
   const allIds = [...albums.map((a) => a.id), ...singles.map((s) => s.id)];
   const albumRatings = await getMyRatings("album", allIds);
