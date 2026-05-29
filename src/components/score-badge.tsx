@@ -9,10 +9,10 @@ export function ScoreBadge({
 }) {
   return (
     <span
-      className={`pointer-events-none inline-flex items-center justify-center rounded-md px-1.5 py-0.5 text-xs font-bold tabular-nums text-black shadow-md ring-1 ring-black/20 ${
+      className={`pointer-events-none inline-flex items-center justify-center rounded-full border border-white/10 bg-black/60 px-2 py-0.5 text-xs font-bold tabular-nums backdrop-blur-sm ${
         className ?? ""
       }`}
-      style={{ backgroundColor: scoreColor(score) }}
+      style={{ color: scoreColor(score) }}
     >
       {score.toFixed(1)}
     </span>
