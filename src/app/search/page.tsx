@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ScoreBadge } from "@/components/score-badge";
+import { getRatingsForItems } from "@/app/actions/ratings";
 
 const MIN_QUERY_LENGTH = 2;
 
@@ -23,7 +25,7 @@ type SearchResult = {
   imageUrl: string | null;
   releaseYear: string;
   kind: string;
-  username?: string; // alleen voor User-resultaten
+  username?: string;
 };
 
 type ApiUser = {
@@ -50,9 +52,17 @@ function detailHref(result: SearchResult): string {
   return `/album/${result.id}`;
 }
 
+// Welk rating-type hoort bij een zoekresultaat (null = niet te raten).
+function ratableType(kind: string): "album" | "track" | null {
+  if (kind === "Album" || kind === "EP" || kind === "Compilation") return "album";
+  if (kind === "Track") return "track";
+  return null;
+}
+
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [ratings, setRatings] = useState<Record<string, number>>({});
   const [activeFilter, setActiveFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +89,6 @@ export default function SearchPage() {
       }
       const musicResults: SearchResult[] = musicData.results ?? [];
 
-      // Gebruikers zijn 'best effort': als dat misgaat tonen we gewoon de muziek.
       let userResults: SearchResult[] = [];
       if (usersRes.ok) {
         const usersData = await usersRes.json();
@@ -97,9 +106,30 @@ export default function SearchPage() {
       setResults([...userResults, ...musicResults]);
       setActiveFilter("all");
       setHasSearched(true);
+
+      // Mijn eigen scores ophalen voor de albums/tracks in de resultaten.
+      const ratable = musicResults
+        .map((r) => {
+          const t = ratableType(r.kind);
+          return t ? { itemType: t, itemId: r.id } : null;
+        })
+        .filter(
+          (x): x is { itemType: "album" | "track"; itemId: string } => x !== null
+        );
+
+      if (ratable.length > 0) {
+        try {
+          setRatings(await getRatingsForItems(ratable));
+        } catch {
+          setRatings({});
+        }
+      } else {
+        setRatings({});
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Er ging iets mis.");
       setResults([]);
+      setRatings({});
     } finally {
       setIsLoading(false);
     }
@@ -186,6 +216,9 @@ export default function SearchPage() {
               const isUser = result.kind === "User";
               const isRound = isArtist || isUser;
               const href = detailHref(result);
+              const rt = ratableType(result.kind);
+              const myScore = rt ? ratings[`${rt}:${result.id}`] : undefined;
+
               return (
                 <div
                   key={`${result.kind}-${result.id}`}
@@ -217,6 +250,9 @@ export default function SearchPage() {
                       <span className="absolute left-2 top-2 rounded-full border border-white/10 bg-black/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/85 backdrop-blur-sm">
                         {result.kind}
                       </span>
+                      {typeof myScore === "number" ? (
+                        <ScoreBadge score={myScore} className="absolute bottom-2 right-2" />
+                      ) : null}
                     </div>
                   </Link>
 
