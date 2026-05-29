@@ -2,6 +2,61 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+type Badge = {
+  id: string;
+  name: string;
+  symbol: string;
+  unlocked: boolean;
+};
+
+type RatingRow = {
+  item_type: string | null;
+  item_id: string | null;
+  score: number | null;
+  item_name: string | null;
+  item_artist: string | null;
+  item_image_url: string | null;
+  created_at: string | null;
+};
+
+const BADGES: Badge[] = [
+  {
+    id: "early_member",
+    name: "Early Member",
+    symbol: "✦",
+    unlocked: true,
+  },
+  {
+    id: "first_ranker",
+    name: "First Ranker",
+    symbol: "◆",
+    unlocked: false,
+  },
+  {
+    id: "tastemaker",
+    name: "Tastemaker",
+    symbol: "◇",
+    unlocked: false,
+  },
+  {
+    id: "early_listener",
+    name: "Early Listener",
+    symbol: "●",
+    unlocked: false,
+  },
+];
+
+function formatDate(date: string | null) {
+  if (!date) {
+    return "Recently";
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+  }).format(new Date(date));
+}
+
 export default async function ProfilePage() {
   const supabase = await createClient();
 
@@ -15,7 +70,9 @@ export default async function ProfilePage() {
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("username, display_name, avatar_url, bio, onboarding_completed")
+    .select(
+      "username, display_name, avatar_url, bio, featured_badge_id, onboarding_completed"
+    )
     .eq("id", user.id)
     .single();
 
@@ -23,30 +80,57 @@ export default async function ProfilePage() {
     redirect("/onboarding");
   }
 
+  const [
+    { count: albumRankingsCount },
+    { count: trackRankingsCount },
+    { data: recentRatingsData },
+  ] = await Promise.all([
+    supabase
+      .from("ratings")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("item_type", "album"),
+
+    supabase
+      .from("ratings")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("item_type", "track"),
+
+    supabase
+      .from("ratings")
+      .select(
+        "item_type, item_id, score, item_name, item_artist, item_image_url, created_at"
+      )
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(6),
+  ]);
+
   const displayName = profile.display_name || profile.username || "Melodic User";
   const username = profile.username || "user";
 
   const avatarInitial =
     displayName?.[0]?.toUpperCase() || username?.[0]?.toUpperCase() || "M";
 
-  const albumRankings = 0;
-  const trackRankings = 0;
+  const albumRankings = albumRankingsCount ?? 0;
+  const trackRankings = trackRankingsCount ?? 0;
   const totalRankings = albumRankings + trackRankings;
-  const points = 0;
+
+  const points = albumRankings * 20 + trackRankings * 8;
+
+  const recentRatings = (recentRatingsData ?? []) as RatingRow[];
+
+  const featuredBadge =
+    BADGES.find((badge) => badge.id === profile.featured_badge_id) ?? null;
+
+  const unlockedBadges = BADGES.filter((badge) => badge.unlocked);
 
   const stats = [
     { label: "Albums", value: albumRankings.toLocaleString() },
     { label: "Tracks", value: trackRankings.toLocaleString() },
     { label: "Points", value: points.toLocaleString() },
   ];
-
-  const badgePreview = [
-    { name: "First Ranker", unlocked: false },
-    { name: "Tastemaker", unlocked: false },
-    { name: "Early Listener", unlocked: false },
-  ];
-
-  const unlockedBadges = badgePreview.filter((badge) => badge.unlocked).length;
 
   return (
     <main className="min-h-screen bg-[#05050d] text-white">
@@ -89,9 +173,18 @@ export default async function ProfilePage() {
                 </div>
 
                 <div className="min-w-0 pb-1">
-                  <h1 className="max-w-full break-words text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
-                    {displayName}
-                  </h1>
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <h1 className="max-w-full break-words text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
+                      {displayName}
+                    </h1>
+
+                    {featuredBadge ? (
+                      <span className="shrink-0 rounded-full border border-violet-300/30 bg-violet-500/15 px-3 py-1 text-xs font-medium text-violet-100">
+                        {featuredBadge.symbol} {featuredBadge.name}
+                      </span>
+                    ) : null}
+                  </div>
+
                   <p className="mt-1 break-words text-sm text-white/45">
                     @{username}
                   </p>
@@ -153,7 +246,7 @@ export default async function ProfilePage() {
                         Badges
                       </p>
                       <p className="mt-1 text-sm font-semibold text-white">
-                        {unlockedBadges} unlocked
+                        {unlockedBadges.length} unlocked
                       </p>
                     </div>
 
@@ -163,9 +256,9 @@ export default async function ProfilePage() {
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {badgePreview.map((badge) => (
+                    {BADGES.slice(0, 3).map((badge) => (
                       <span
-                        key={badge.name}
+                        key={badge.id}
                         className={
                           badge.unlocked
                             ? "rounded-full border border-violet-300/30 bg-violet-500/15 px-2.5 py-1 text-xs text-violet-100"
@@ -194,19 +287,79 @@ export default async function ProfilePage() {
                 Recent activity
               </h2>
               <p className="mt-1 text-sm text-white/45">
-                Your album and track rankings will appear here later.
+                Your latest album and track rankings.
               </p>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-black/20 p-8 text-center">
-              <p className="text-sm font-medium text-white/70">
-                No activity yet
-              </p>
-              <p className="mt-2 text-sm text-white/40">
-                Once rankings are added, this page will start showing your music
-                taste.
-              </p>
-            </div>
+            {recentRatings.length > 0 ? (
+              <div className="mt-6 divide-y divide-white/[0.06] overflow-hidden rounded-2xl border border-white/[0.08] bg-black/20">
+                {recentRatings.map((rating) => {
+                  const content = (
+                    <div className="group flex items-center gap-4 px-4 py-4 transition hover:bg-white/[0.04]">
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
+                        {rating.item_image_url ? (
+                          <img
+                            src={rating.item_image_url}
+                            alt={rating.item_name || "Rated item"}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs text-white/30">
+                            {rating.item_type === "album" ? "Album" : "Track"}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-white">
+                          {rating.item_name || "Untitled"}
+                        </p>
+                        <p className="truncate text-xs text-white/40">
+                          {rating.item_artist || "Unknown artist"}
+                        </p>
+                        <p className="mt-1 text-[11px] uppercase tracking-wider text-white/25">
+                          {rating.item_type === "album" ? "Album" : "Track"} ·{" "}
+                          {formatDate(rating.created_at)}
+                        </p>
+                      </div>
+
+                      <div className="shrink-0 rounded-xl border border-violet-300/20 bg-violet-500/10 px-3 py-2 text-sm font-semibold tabular-nums text-violet-100">
+                        {rating.score?.toFixed(1) ?? "—"}
+                      </div>
+                    </div>
+                  );
+
+                  if (rating.item_type === "album" && rating.item_id) {
+                    return (
+                      <Link
+                        key={`${rating.item_type}-${rating.item_id}-${rating.created_at}`}
+                        href={`/album/${rating.item_id}`}
+                      >
+                        {content}
+                      </Link>
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={`${rating.item_type}-${rating.item_id}-${rating.created_at}`}
+                    >
+                      {content}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-black/20 p-8 text-center">
+                <p className="text-sm font-medium text-white/70">
+                  No activity yet
+                </p>
+                <p className="mt-2 text-sm text-white/40">
+                  Once rankings are added, this page will start showing your
+                  music taste.
+                </p>
+              </div>
+            )}
           </div>
 
           <aside className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-6">
@@ -219,8 +372,9 @@ export default async function ProfilePage() {
             </h2>
 
             <p className="mt-3 text-sm leading-relaxed text-white/50">
-              After you rank albums and tracks, Melodic can turn your activity
-              into taste stats, favorite genres, top artists and rating patterns.
+              After you rank more albums and tracks, Melodic can turn your
+              activity into taste stats, favorite genres, top artists and rating
+              patterns.
             </p>
 
             <div className="mt-6 space-y-3">
