@@ -156,12 +156,13 @@ export default function SearchPage() {
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {visibleResults.map((result) => {
               const isArtist = result.kind === "Artist";
+              const href = detailHref(result);
               return (
                 <div
                   key={`${result.kind}-${result.id}`}
                   className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 transition hover:border-violet-400/30 hover:bg-white/[0.04]"
                 >
-                  <Link href={detailHref(result)} className="group block">
+                  <Link href={href} className="group block">
                     <div className="relative">
                       <div
                         className={`aspect-square w-full overflow-hidden bg-white/[0.04] ${
@@ -172,7 +173,7 @@ export default function SearchPage() {
                           <img
                             src={result.imageUrl}
                             alt={result.name}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-cover transition group-hover:scale-105"
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-xs text-white/25">
@@ -184,9 +185,13 @@ export default function SearchPage() {
                         {result.kind}
                       </span>
                     </div>
-                    <p className="mt-3 truncate text-sm font-semibold text-white transition group-hover:text-violet-100">
-                      {result.name}
-                    </p>
+                  </Link>
+
+                  <Link
+                    href={href}
+                    className="mt-3 block truncate text-sm font-semibold text-white transition hover:text-violet-100 hover:underline"
+                  >
+                    {result.name}
                   </Link>
 
                   {!isArtist && result.artists.length > 0 ? (
