@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getAlbum } from "@/lib/spotify";
 import { getMyRating, getMyRatings } from "@/lib/ratings";
 import { RatingControl } from "@/components/rating-control";
+import { TrackRatingSlider } from "@/components/track-rating-slider";
 
 function formatDuration(ms: number): string {
   const totalSeconds = Math.round(ms / 1000);
@@ -54,57 +55,59 @@ export default async function AlbumPage({
           ← {backLabel}
         </Link>
 
-        <header className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-end">
-          <div className="h-44 w-44 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-2xl">
-            {album.imageUrl ? (
-              <img
-                src={album.imageUrl}
-                alt={album.name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-xs text-white/25">
-                No image
-              </div>
-            )}
+        <header className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-end">
+            <div className="h-44 w-44 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-2xl">
+              {album.imageUrl ? (
+                <img
+                  src={album.imageUrl}
+                  alt={album.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-xs text-white/25">
+                  No image
+                </div>
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-violet-300/80">
+                {album.kind}
+              </p>
+              <h1 className="mt-1 break-words text-3xl font-semibold tracking-tight md:text-4xl">
+                {album.name}
+              </h1>
+              <p className="mt-2 text-sm text-white/55">
+                {album.artists.map((a, i) => (
+                  <span key={a.id}>
+                    {i > 0 ? ", " : ""}
+                    <Link
+                      href={`/artist/${a.id}`}
+                      className="transition hover:text-white hover:underline"
+                    >
+                      {a.name}
+                    </Link>
+                  </span>
+                ))}
+              </p>
+              <p className="mt-1 text-sm text-white/35">
+                {album.releaseYear}
+                {album.totalTracks ? ` · ${album.totalTracks} tracks` : ""}
+              </p>
+            </div>
           </div>
 
-          <div className="min-w-0">
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-violet-300/80">
-              {album.kind}
-            </p>
-            <h1 className="mt-1 break-words text-3xl font-semibold tracking-tight md:text-4xl">
-              {album.name}
-            </h1>
-            <p className="mt-2 text-sm text-white/55">
-              {album.artists.map((a, i) => (
-                <span key={a.id}>
-                  {i > 0 ? ", " : ""}
-                  <Link
-                    href={`/artist/${a.id}`}
-                    className="transition hover:text-white hover:underline"
-                  >
-                    {a.name}
-                  </Link>
-                </span>
-              ))}
-            </p>
-            <p className="mt-1 text-sm text-white/35">
-              {album.releaseYear}
-              {album.totalTracks ? ` · ${album.totalTracks} tracks` : ""}
-            </p>
-
-            <div className="mt-4">
-              <RatingControl
-                variant="prominent"
-                itemType="album"
-                itemId={album.id}
-                itemName={album.name}
-                itemArtist={artistText}
-                itemImageUrl={album.imageUrl}
-                initialScore={albumRating}
-              />
-            </div>
+          <div className="shrink-0 sm:pb-1">
+            <RatingControl
+              variant="prominent"
+              itemType="album"
+              itemId={album.id}
+              itemName={album.name}
+              itemArtist={artistText}
+              itemImageUrl={album.imageUrl}
+              initialScore={albumRating}
+            />
           </div>
         </header>
 
@@ -117,7 +120,7 @@ export default async function AlbumPage({
               return (
                 <li
                   key={track.id}
-                  className="flex items-center gap-3 px-4 py-3 transition hover:bg-white/[0.03]"
+                  className="group flex items-center gap-3 px-4 py-3 transition hover:bg-white/[0.03]"
                 >
                   <span className="w-6 shrink-0 text-right text-sm tabular-nums text-white/35">
                     {track.trackNumber || "•"}
@@ -146,9 +149,7 @@ export default async function AlbumPage({
                     {formatDuration(track.durationMs)}
                   </span>
 
-                  <RatingControl
-                    variant="compact"
-                    itemType="track"
+                  <TrackRatingSlider
                     itemId={track.id}
                     itemName={track.name}
                     itemArtist={track.artists.map((a) => a.name).join(", ")}
