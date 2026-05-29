@@ -159,4 +159,18 @@ function NetworkEmpty() {
   );
 }
 
-exp
+export function RightRail({
+  profile,
+}: {
+  profile: HomeProfile;
+  activity?: Activity[];
+  onEditProfile?: () => void;
+}) {
+  return (
+    <aside className="space-y-10 lg:sticky lg:top-8 lg:space-y-12">
+      <ProfileCard profile={profile} />
+      <RecentRatingsEmpty />
+      <NetworkEmpty />
+    </aside>
+  );
+}
