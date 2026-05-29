@@ -8,6 +8,7 @@ const MIN = 0.1;
 const MAX = 10;
 const STEP = 0.1;
 const DEFAULT_DRAFT = 7;
+const MAX_REVIEW_LENGTH = 500;
 
 const POPOVER_SLIDER_CLASSES =
   "mt-3 h-2 w-full cursor-pointer appearance-none rounded-full " +
@@ -23,6 +24,7 @@ type Props = {
   itemArtist: string;
   itemImageUrl: string | null;
   initialScore: number | null;
+  initialReviewText?: string | null;
   variant?: "compact" | "prominent";
   label?: string;
 };
@@ -38,6 +40,7 @@ export function RatingControl({
   itemArtist,
   itemImageUrl,
   initialScore,
+  initialReviewText = null,
   variant = "compact",
   label,
 }: Props) {
@@ -46,17 +49,22 @@ export function RatingControl({
   const [text, setText] = useState<string>(
     (initialScore ?? DEFAULT_DRAFT).toFixed(1)
   );
+  const [reviewText, setReviewText] = useState(initialReviewText ?? "");
+  const [savedReviewText, setSavedReviewText] = useState(initialReviewText ?? "");
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const hasScore = score !== null;
   const buttonLabel = label ?? `Rate ${itemType}`;
+  const canReview = itemType === "album";
 
   function openPopover() {
     const start = score ?? DEFAULT_DRAFT;
+
     setDraft(start);
     setText(start.toFixed(1));
+    setReviewText(savedReviewText);
     setError(null);
     setOpen(true);
   }
@@ -75,6 +83,7 @@ export function RatingControl({
     }
 
     const parsed = Number(value);
+
     if (!Number.isNaN(parsed)) {
       setDraft(clampScore(parsed));
     }
@@ -94,6 +103,8 @@ export function RatingControl({
     }
 
     const finalScore = clampScore(parsed);
+    const cleanReviewText = canReview ? reviewText.trim().slice(0, MAX_REVIEW_LENGTH) : "";
+
     setError(null);
 
     startTransition(async () => {
@@ -104,12 +115,15 @@ export function RatingControl({
         itemName,
         itemArtist,
         itemImageUrl,
+        reviewText: canReview ? cleanReviewText : null,
       });
 
       if (res.ok && typeof res.score === "number") {
         setScore(res.score);
         setDraft(res.score);
         setText(res.score.toFixed(1));
+        setSavedReviewText(res.reviewText ?? "");
+        setReviewText(res.reviewText ?? "");
         setOpen(false);
       } else {
         setError(res.error ?? "Something went wrong.");
@@ -127,6 +141,8 @@ export function RatingControl({
         setScore(null);
         setDraft(DEFAULT_DRAFT);
         setText(DEFAULT_DRAFT.toFixed(1));
+        setReviewText("");
+        setSavedReviewText("");
         setOpen(false);
       } else {
         setError(res.error ?? "Something went wrong.");
@@ -144,6 +160,11 @@ export function RatingControl({
         {score!.toFixed(1)}
       </span>
       <span className="text-white/45">/ 10</span>
+      {canReview && savedReviewText ? (
+        <span className="ml-1 rounded-full border border-violet-300/20 bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-100">
+          Review
+        </span>
+      ) : null}
     </button>
   ) : (
     <button
@@ -182,7 +203,7 @@ export function RatingControl({
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-10 cursor-default"
           />
-          <div className="absolute right-0 z-20 mt-2 w-64 rounded-2xl border border-white/10 bg-[#0b0b16] p-4 text-left shadow-2xl">
+          <div className="absolute right-0 z-20 mt-2 w-72 rounded-2xl border border-white/10 bg-[#0b0b16] p-4 text-left shadow-2xl">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-medium uppercase tracking-wider text-white/40">
                 Your score
@@ -200,6 +221,7 @@ export function RatingControl({
                   }
 
                   const parsed = Number(text);
+
                   if (!Number.isNaN(parsed)) {
                     const clamped = clampScore(parsed);
                     setDraft(clamped);
@@ -226,6 +248,34 @@ export function RatingControl({
               <span>0.1</span>
               <span>10</span>
             </div>
+
+            {canReview ? (
+              <div className="mt-4">
+                <div className="flex items-center justify-between gap-2">
+                  <label
+                    htmlFor={`review-${itemType}-${itemId}`}
+                    className="text-xs font-medium uppercase tracking-wider text-white/40"
+                  >
+                    Review
+                  </label>
+                  <span className="text-[10px] tabular-nums text-white/30">
+                    {reviewText.length}/{MAX_REVIEW_LENGTH}
+                  </span>
+                </div>
+
+                <textarea
+                  id={`review-${itemType}-${itemId}`}
+                  value={reviewText}
+                  maxLength={MAX_REVIEW_LENGTH}
+                  onChange={(e) =>
+                    setReviewText(e.target.value.slice(0, MAX_REVIEW_LENGTH))
+                  }
+                  placeholder="Write a short thought about this album..."
+                  rows={4}
+                  className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm leading-relaxed text-white outline-none placeholder:text-white/30 focus:border-violet-400/35 focus:bg-white/[0.06]"
+                />
+              </div>
+            ) : null}
 
             {error ? <p className="mt-2 text-xs text-red-300">{error}</p> : null}
 
