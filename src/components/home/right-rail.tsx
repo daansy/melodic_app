@@ -1,13 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { AlbumCover, Avatar, DropdownMenu } from "@/components/ui/primitives";
-import { RatingBadge } from "@/components/ui/rating-badge";
+import { Avatar, DropdownMenu } from "@/components/ui/primitives";
 import { SectionHeader } from "@/components/ui/section";
-import { yourRecentRatings } from "@/lib/data";
-import { albumSlug } from "@/lib/slug";
-import type { Activity, RecentRating } from "@/lib/types";
+import type { Activity } from "@/lib/types";
 
 const BADGES: Record<string, { name: string; symbol: string }> = {
   early_member: { name: "Early Member", symbol: "✦" },
@@ -19,6 +15,7 @@ type HomeProfile = {
   avatar_url: string | null;
   bio: string | null;
   featured_badge_id?: string | null;
+  created_at?: string | null;
   onboarding_completed: boolean | null;
 };
 
@@ -31,6 +28,22 @@ function ProfileCard({ profile }: { profile: HomeProfile }) {
   const featuredBadge = profile.featured_badge_id
     ? BADGES[profile.featured_badge_id] ?? null
     : null;
+
+  // "Early Member" wordt ontgrendeld bij het aanmaken van je account,
+  // dus gebruiken we created_at als unlock-datum.
+  const unlockedLabel = profile.created_at
+    ? new Date(profile.created_at).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : null;
+
+  const badgeTitle = featuredBadge
+    ? unlockedLabel
+      ? `${featuredBadge.name} — unlocked ${unlockedLabel}`
+      : featuredBadge.name
+    : "";
 
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
@@ -49,17 +62,23 @@ function ProfileCard({ profile }: { profile: HomeProfile }) {
             )}
 
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">
-                {displayName}
-              </p>
-              <p className="truncate text-xs text-white/40">@{username}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="truncate text-sm font-semibold text-white">
+                  {displayName}
+                </p>
 
-              {featuredBadge ? (
-                <span className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-violet-300/30 bg-violet-500/15 px-2 py-0.5 text-[11px] font-medium text-violet-100">
-                  <span aria-hidden>{featuredBadge.symbol}</span>
-                  {featuredBadge.name}
-                </span>
-              ) : null}
+                {featuredBadge ? (
+                  <span
+                    className="shrink-0 text-sm leading-none text-violet-300"
+                    title={badgeTitle}
+                    aria-label={badgeTitle}
+                  >
+                    {featuredBadge.symbol}
+                  </span>
+                ) : null}
+              </div>
+
+              <p className="truncate text-xs text-white/40">@{username}</p>
             </div>
           </Link>
         </DropdownMenu>
@@ -96,114 +115,46 @@ function ProfileCard({ profile }: { profile: HomeProfile }) {
   );
 }
 
-function RecentRatingsList({ items }: { items: RecentRating[] }) {
+function RecentRatingsEmpty() {
   return (
     <div>
       <SectionHeader eyebrow="Your log" title="Recent ratings" />
-      <ul className="mt-4 space-y-1">
-        {items.map((item) => (
-          <li key={`${item.title}-${item.ratedAt}`}>
-            <Link
-              href={`/album/${albumSlug(item.title, item.artist)}`}
-              className="melodic-fade-up group flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition hover:-translate-y-[1px] hover:bg-white/[0.04]"
-            >
-              <AlbumCover
-                url={item.coverUrl}
-                alt={item.title}
-                className="h-12 w-12"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-white/90 group-hover:text-white">
-                  {item.title}
-                </p>
-                <p className="truncate text-xs text-white/40">{item.artist}</p>
-              </div>
-              <div className="flex shrink-0 flex-col items-end gap-0.5">
-                <RatingBadge score={item.rating} size="sm" showScale={false} />
-                <span className="text-[10px] text-white/30">
-                  {item.ratedAt}
-                </span>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="mt-4 rounded-xl border border-dashed border-white/10 bg-black/20 p-5 text-center">
+        <p className="text-sm font-medium text-white/70">No ratings yet</p>
+        <p className="mt-1 text-xs text-white/40">
+          Albums and tracks you rate will show up here.
+        </p>
+      </div>
     </div>
   );
 }
 
-function NetworkActivity({ items }: { items: Activity[] }) {
+function NetworkEmpty() {
   return (
     <div>
-      <div className="flex items-end justify-between gap-3">
-        <SectionHeader eyebrow="Network" title="Recent scores" />
-        <button
-          type="button"
-          className="mb-1 text-xs font-medium text-violet-300/90 transition hover:text-violet-200"
-        >
-          See all
-        </button>
+      <SectionHeader eyebrow="Network" title="Recent scores" />
+      <div className="mt-4 rounded-xl border border-dashed border-white/10 bg-black/20 p-5 text-center">
+        <p className="text-sm font-medium text-white/70">Nothing here yet</p>
+        <p className="mt-1 text-xs text-white/40">
+          Ratings from people you follow will appear here.
+        </p>
       </div>
-
-      <ul className="mt-4 space-y-3">
-        {items.map((item) => (
-          <li
-            key={item.id}
-            className="melodic-fade-up flex gap-3 rounded-xl border border-transparent p-2 transition hover:-translate-y-[1px] hover:border-white/[0.08] hover:bg-white/[0.04]"
-          >
-            <Avatar url={item.user.avatarUrl} alt={item.user.name} size="sm" />
-
-            <div className="min-w-0 flex-1">
-              <p className="text-sm leading-snug text-white/80">
-                <span className="font-medium text-white">{item.user.name}</span>{" "}
-                <span className="text-white/45">
-                  {item.action === "rated" ? "rated" : "reviewed"}
-                </span>{" "}
-                <span className="font-medium text-white">
-                  {item.album.title}
-                </span>
-              </p>
-              <p className="mt-0.5 text-xs text-white/35">{item.time} ago</p>
-            </div>
-
-            {item.rating != null ? (
-              <RatingBadge
-                score={item.rating}
-                size="sm"
-                showScale={false}
-                className="shrink-0 self-center"
-              />
-            ) : (
-              <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg ring-1 ring-white/10">
-                <Image
-                  src={item.album.coverUrl}
-                  alt=""
-                  fill
-                  sizes="40px"
-                  className="object-cover"
-                />
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
 
 export function RightRail({
-  activity,
   profile,
 }: {
-  activity: Activity[];
   profile: HomeProfile;
+  activity?: Activity[];
   onEditProfile?: () => void;
 }) {
   return (
     <aside className="space-y-10 lg:sticky lg:top-8 lg:max-h-[calc(100vh-7rem)] lg:space-y-12 lg:overflow-y-auto lg:pb-4">
       <ProfileCard profile={profile} />
-      <RecentRatingsList items={yourRecentRatings} />
-      <NetworkActivity items={activity} />
+      <RecentRatingsEmpty />
+      <NetworkEmpty />
     </aside>
   );
 }
