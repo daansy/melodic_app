@@ -5,18 +5,44 @@ import Link from "next/link";
 
 const MIN_QUERY_LENGTH = 2;
 
+const FILTERS = [
+  { id: "all", label: "All" },
+  { id: "albums", label: "Albums" },
+  { id: "eps", label: "EPs" },
+  { id: "tracks", label: "Tracks" },
+  { id: "artists", label: "Artists" },
+];
+
+type ResultArtist = { id: string; name: string };
+
 type SearchResult = {
   id: string;
   name: string;
-  artist: string;
+  artists: ResultArtist[];
   imageUrl: string | null;
   releaseYear: string;
   kind: string;
 };
 
+function matchesFilter(kind: string, filter: string): boolean {
+  if (filter === "all") return true;
+  if (filter === "albums") return kind === "Album" || kind === "Compilation";
+  if (filter === "eps") return kind === "EP";
+  if (filter === "tracks") return kind === "Track";
+  if (filter === "artists") return kind === "Artist";
+  return true;
+}
+
+function detailHref(result: SearchResult): string {
+  if (result.kind === "Artist") return `/artist/${result.id}`;
+  if (result.kind === "Track") return `/track/${result.id}`;
+  return `/album/${result.id}`;
+}
+
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [activeFilter, setActiveFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
@@ -41,6 +67,7 @@ export default function SearchPage() {
       }
 
       setResults(data.results ?? []);
+      setActiveFilter("all");
       setHasSearched(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Er ging iets mis.");
@@ -49,6 +76,8 @@ export default function SearchPage() {
       setIsLoading(false);
     }
   }
+
+  const visibleResults = results.filter((r) => matchesFilter(r.kind, activeFilter));
 
   return (
     <main className="min-h-screen bg-[#05050d] text-white">
@@ -73,7 +102,7 @@ export default function SearchPage() {
           Search music
         </h1>
         <p className="mt-2 text-sm text-white/45">
-          Find an album, EP, single or track to rate. Powered by the Spotify
+          Find albums, EPs, tracks and artists to rate. Powered by the Spotify
           catalog.
         </p>
 
@@ -105,44 +134,99 @@ export default function SearchPage() {
         ) : null}
 
         {results.length > 0 ? (
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {results.map((result) => (
-              <Link
-                key={`${result.kind}-${result.id}`}
-                href={
-                  result.kind === "Track"
-                    ? `/track/${result.id}`
-                    : `/album/${result.id}`
+          <div className="mt-6 flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setActiveFilter(f.id)}
+                className={
+                  activeFilter === f.id
+                    ? "rounded-full border border-violet-400/40 bg-violet-500/20 px-4 py-1.5 text-sm font-medium text-violet-100"
+                    : "rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-sm text-white/60 transition hover:bg-white/[0.06] hover:text-white"
                 }
-                className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 transition hover:-translate-y-0.5 hover:border-violet-400/30 hover:bg-white/[0.04]"
               >
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-white/[0.04]">
-                  {result.imageUrl ? (
-                    <img
-                      src={result.imageUrl}
-                      alt={result.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs text-white/25">
-                      No image
-                    </div>
-                  )}
-
-                  <span className="absolute left-2 top-2 rounded-full border border-white/10 bg-black/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/85 backdrop-blur-sm">
-                    {result.kind}
-                  </span>
-                </div>
-
-                <p className="mt-3 truncate text-sm font-semibold text-white">
-                  {result.name}
-                </p>
-                <p className="truncate text-xs text-white/45">{result.artist}</p>
-                <p className="mt-1 text-[11px] text-white/30">
-                  {result.releaseYear}
-                </p>
-              </Link>
+                {f.label}
+              </button>
             ))}
+          </div>
+        ) : null}
+
+        {visibleResults.length > 0 ? (
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {visibleResults.map((result) => {
+              const isArtist = result.kind === "Artist";
+              return (
+                <div
+                  key={`${result.kind}-${result.id}`}
+                  className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 transition hover:border-violet-400/30 hover:bg-white/[0.04]"
+                >
+                  <Link href={detailHref(result)} className="group block">
+                    <div className="relative">
+                      <div
+                        className={`aspect-square w-full overflow-hidden bg-white/[0.04] ${
+                          isArtist ? "rounded-full" : "rounded-xl"
+                        }`}
+                      >
+                        {result.imageUrl ? (
+                          <img
+                            src={result.imageUrl}
+                            alt={result.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs text-white/25">
+                            No image
+                          </div>
+                        )}
+                      </div>
+                      <span className="absolute left-2 top-2 rounded-full border border-white/10 bg-black/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/85 backdrop-blur-sm">
+                        {result.kind}
+                      </span>
+                    </div>
+                    <p className="mt-3 truncate text-sm font-semibold text-white transition group-hover:text-violet-100">
+                      {result.name}
+                    </p>
+                  </Link>
+
+                  {!isArtist && result.artists.length > 0 ? (
+                    <p className="truncate text-xs text-white/45">
+                      {result.artists.map((a, i) => (
+                        <span key={a.id}>
+                          {i > 0 ? ", " : ""}
+                          <Link
+                            href={`/artist/${a.id}`}
+                            className="transition hover:text-white hover:underline"
+                          >
+                            {a.name}
+                          </Link>
+                        </span>
+                      ))}
+                    </p>
+                  ) : null}
+
+                  {result.releaseYear ? (
+                    <p className="mt-1 text-[11px] text-white/30">
+                      {result.releaseYear}
+                    </p>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
+
+        {hasSearched &&
+        !isLoading &&
+        results.length > 0 &&
+        visibleResults.length === 0 ? (
+          <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-black/20 p-8 text-center">
+            <p className="text-sm font-medium text-white/70">
+              Nothing in this filter
+            </p>
+            <p className="mt-1 text-sm text-white/40">
+              Try another filter or a different search.
+            </p>
           </div>
         ) : null}
 
