@@ -4,6 +4,8 @@ const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_SEARCH_URL = "https://api.spotify.com/v1/search";
 const MIN_QUERY_LENGTH = 2;
 const EP_MIN_TRACKS = 4; // vanaf dit aantal nummers noemen we een 'single'-release een EP
+const PAGE_SIZE = 20; // Spotify's standaard paginagrootte (we mogen geen 'limit' sturen)
+const PAGES_TO_FETCH = 2; // aantal pagina's voor meer resultaten; verhoog dit voor nog meer
 
 type SpotifyTokenCache = {
   accessToken: string;
@@ -140,14 +142,13 @@ function matchesAllWords(result: SearchResult, queryWords: string[]): boolean {
   return queryWords.every((word) => haystack.includes(word));
 }
 
-async function searchSpotify(query: string): Promise<SearchResult[]> {
-  const token = await getAccessToken();
-
+async function fetchSearchPage(query: string, token: string, offset: number) {
   const url = new URL(SPOTIFY_SEARCH_URL);
   url.searchParams.set("q", query);
   url.searchParams.set("type", "album,track");
-  // Let op: GEEN 'limit' meesturen. Door de beperkingen van een Spotify
-  // developer-app geeft die parameter een misleidende 400 "Invalid limit".
+  if (offset > 0) {
+    url.searchParams.set("offset", String(offset));
+  }
 
   const response = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${token}` },
@@ -156,23 +157,61 @@ async function searchSpotify(query: string): Promise<SearchResult[]> {
 
   if (!response.ok) {
     const detail = await response.text();
-    console.error("Spotify search failed:", response.status, detail);
-    throw new Error(`Spotify-zoekopdracht mislukt (status ${response.status}).`);
+    console.error("Spotify search failed:", response.status, "offset", offset, detail);
+    return null; // deze pagina overslaan, niet de hele zoekopdracht laten mislukken
   }
 
   const data = await response.json();
-  const albumItems: SpotifyAlbumItem[] = data.albums?.items ?? [];
-  const trackItems: SpotifyTrackItem[] = data.tracks?.items ?? [];
+  return {
+    albums: (data.albums?.items ?? []) as SpotifyAlbumItem[],
+    tracks: (data.tracks?.items ?? []) as SpotifyTrackItem[],
+  };
+}
 
-  // Albums (incl. EP's, singles, compilaties) eerst, daarna losse tracks.
-  const combined = [...albumItems.map(mapAlbum), ...trackItems.map(mapTrack)];
+async function searchSpotify(query: string): Promise<SearchResult[]> {
+  const token = await getAccessToken();
+
+  // Meerdere pagina's tegelijk ophalen voor meer resultaten.
+  const offsets = Array.from({ length: PAGES_TO_FETCH }, (_, i) => i * PAGE_SIZE);
+  const pages = await Promise.all(
+    offsets.map((offset) => fetchSearchPage(query, token, offset))
+  );
+
+  // Mislukt zelfs de eerste pagina, dan is er echt iets mis.
+  if (pages[0] === null) {
+    throw new Error("Spotify-zoekopdracht mislukt.");
+  }
+
+  const albumItems: SpotifyAlbumItem[] = [];
+  const trackItems: SpotifyTrackItem[] = [];
+  for (const page of pages) {
+    if (page) {
+      albumItems.push(...page.albums);
+      trackItems.push(...page.tracks);
+    }
+  }
+
+  const albums = albumItems.map(mapAlbum);
+  const tracks = trackItems.map(mapTrack);
+
+  // Singles weglaten waarvan hetzelfde nummer ook al als losse track terugkomt.
+  const trackSignatures = new Set(
+    tracks.map((t) => `${t.name.toLowerCase()}|${t.artist.toLowerCase()}`)
+  );
+  const albumsWithoutRedundantSingles = albums.filter((album) => {
+    if (album.kind !== "Single") return true;
+    const signature = `${album.name.toLowerCase()}|${album.artist.toLowerCase()}`;
+    return !trackSignatures.has(signature);
+  });
+
+  // Releases eerst, daarna losse tracks; dubbele edities samenvoegen.
+  const combined = [...albumsWithoutRedundantSingles, ...tracks];
   const unique = removeDuplicates(combined);
 
   // Relevantiefilter: elk zoekwoord moet in de artiest of titel voorkomen.
   const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean);
   const relevant = unique.filter((item) => matchesAllWords(item, queryWords));
 
-  // Laat het filter niets over, dan tonen we toch de resultaten zonder dat filter.
   return relevant.length > 0 ? relevant : unique;
 }
 
