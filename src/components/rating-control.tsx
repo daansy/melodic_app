@@ -6,7 +6,7 @@ import { scoreColor, SCORE_TRACK_GRADIENT } from "@/lib/score-color";
 
 const MIN = 0;
 const MAX = 10;
-const STEP = 0.5;
+const STEP = 0.1;
 const DEFAULT_DRAFT = 7;
 
 const POPOVER_SLIDER_CLASSES =
@@ -24,6 +24,7 @@ type Props = {
   itemImageUrl: string | null;
   initialScore: number | null;
   variant?: "compact" | "prominent";
+  label?: string;
 };
 
 function clampScore(n: number): number {
@@ -38,6 +39,7 @@ export function RatingControl({
   itemImageUrl,
   initialScore,
   variant = "compact",
+  label,
 }: Props) {
   const [score, setScore] = useState<number | null>(initialScore);
   const [draft, setDraft] = useState<number>(initialScore ?? DEFAULT_DRAFT);
@@ -47,6 +49,7 @@ export function RatingControl({
   const [isPending, startTransition] = useTransition();
 
   const hasScore = score !== null;
+  const buttonLabel = label ?? `Rate ${itemType}`;
 
   function openPopover() {
     const start = score ?? DEFAULT_DRAFT;
@@ -110,9 +113,9 @@ export function RatingControl({
     <button
       type="button"
       onClick={openPopover}
-      className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-5 py-2.5 text-sm font-semibold transition hover:bg-white/[0.08]"
+      className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-6 py-3 text-[15px] font-semibold transition hover:bg-white/[0.08]"
     >
-      <span className="text-lg tabular-nums" style={{ color: scoreColor(score!) }}>
+      <span className="text-xl tabular-nums" style={{ color: scoreColor(score!) }}>
         {score!.toFixed(1)}
       </span>
       <span className="text-white/45">/ 10</span>
@@ -121,9 +124,9 @@ export function RatingControl({
     <button
       type="button"
       onClick={openPopover}
-      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/30 transition hover:from-violet-500 hover:to-fuchsia-500"
+      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-violet-900/30 transition hover:from-violet-500 hover:to-fuchsia-500"
     >
-      Rate {itemType}
+      {buttonLabel}
     </button>
   );
 
