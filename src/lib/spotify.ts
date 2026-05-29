@@ -275,3 +275,61 @@ export async function getAlbum(id: string): Promise<AlbumDetail | null> {
     tracks: trackItems.map(mapTrack),
   };
 }
+
+// ---- Track (single) ----
+
+type TrackResponse = {
+  id: string;
+  name: string;
+  duration_ms?: number;
+  explicit?: boolean;
+  track_number?: number;
+  artists?: SpotifyArtistRef[];
+  album?: {
+    id: string;
+    name: string;
+    images?: SpotifyImage[];
+    release_date?: string;
+  };
+};
+
+export type TrackDetail = {
+  id: string;
+  name: string;
+  durationMs: number;
+  explicit: boolean;
+  trackNumber: number;
+  artists: { id: string; name: string }[];
+  album: {
+    id: string;
+    name: string;
+    imageUrl: string | null;
+    releaseYear: string;
+  } | null;
+};
+
+export async function getTrack(id: string): Promise<TrackDetail | null> {
+  const data = await spotifyGet<TrackResponse>(`/tracks/${id}`);
+  if (!data) return null;
+
+  const album = data.album
+    ? {
+        id: data.album.id,
+        name: data.album.name,
+        imageUrl: data.album.images?.[0]?.url ?? null,
+        releaseYear: data.album.release_date
+          ? data.album.release_date.slice(0, 4)
+          : "",
+      }
+    : null;
+
+  return {
+    id: data.id,
+    name: data.name,
+    durationMs: data.duration_ms ?? 0,
+    explicit: Boolean(data.explicit),
+    trackNumber: data.track_number ?? 0,
+    artists: (data.artists ?? []).map((a) => ({ id: a.id, name: a.name })),
+    album,
+  };
+}
