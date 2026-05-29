@@ -5,8 +5,8 @@ const SPOTIFY_SEARCH_URL = "https://api.spotify.com/v1/search";
 const MIN_QUERY_LENGTH = 2;
 const EP_MIN_TRACKS = 3; // vanaf dit aantal nummers noemen we een 'single'-release een EP
 const PAGE_SIZE = 20; // Spotify's standaard paginagrootte (we mogen geen 'limit' sturen)
-const ALBUM_PAGES = 3; // pagina's albums: hoger = meer van de discografie
-const TRACK_PAGES = 1; // pagina's tracks
+const ALBUM_PAGES = 5; // pagina's albums: hoger = meer van de discografie
+const TRACK_PAGES = 2; // pagina's tracks
 const ARTIST_PAGES = 1; // pagina's artiesten
 
 // Volgorde waarin types getoond worden: eerst de artiest, dan albums, dan tracks.
@@ -236,8 +236,11 @@ async function searchSpotify(query: string): Promise<SearchResult[]> {
   const tracks = trackItems.map(mapTrack);
   const artists = artistItems.map(mapArtist);
 
-  const combined = [...artists, ...albums, ...tracks];
-  const unique = removeDuplicates(combined);
+// Resultaten zonder afbeelding weglaten; die zien er rommelig uit.
+  const withImage = [...artists, ...albums, ...tracks].filter(
+    (r) => r.imageUrl !== null
+  );
+  const unique = removeDuplicates(withImage);
 
   // Relevantiefilter: elk zoekwoord moet in de artiest of titel voorkomen.
   const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean);
