@@ -1,6 +1,7 @@
-/** Clamp and round for display on Melodic's 1–10 scale */
+/** Clamp and round for display on Melodic's 0.1–10 scale */
 export function clampScore(score: number): number {
-  return Math.max(1, Math.min(10, score));
+  const rounded = Math.round(score * 10) / 10;
+  return Math.max(0.1, Math.min(10, rounded));
 }
 
 export function formatScore(score: number, decimals = 1): string {

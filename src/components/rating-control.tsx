@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { rateItem, removeRating } from "@/app/actions/ratings";
 import { scoreColor, SCORE_TRACK_GRADIENT } from "@/lib/score-color";
 
-const MIN = 0;
+const MIN = 0.1;
 const MAX = 10;
 const STEP = 0.1;
 const DEFAULT_DRAFT = 7;
@@ -43,7 +43,9 @@ export function RatingControl({
 }: Props) {
   const [score, setScore] = useState<number | null>(initialScore);
   const [draft, setDraft] = useState<number>(initialScore ?? DEFAULT_DRAFT);
-  const [text, setText] = useState<string>((initialScore ?? DEFAULT_DRAFT).toFixed(1));
+  const [text, setText] = useState<string>(
+    (initialScore ?? DEFAULT_DRAFT).toFixed(1)
+  );
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -60,24 +62,40 @@ export function RatingControl({
   }
 
   function onSlider(value: number) {
-    setDraft(value);
-    setText(value.toFixed(1));
+    const clamped = clampScore(value);
+    setDraft(clamped);
+    setText(clamped.toFixed(1));
   }
 
   function onText(value: string) {
     setText(value);
+
+    if (value === "") {
+      return;
+    }
+
     const parsed = Number(value);
-    if (!Number.isNaN(parsed)) setDraft(clampScore(parsed));
+    if (!Number.isNaN(parsed)) {
+      setDraft(clampScore(parsed));
+    }
   }
 
   function save() {
-    const parsed = Number(text);
-    if (Number.isNaN(parsed)) {
-      setError("Vul een getal tussen 0 en 10 in.");
+    if (text.trim() === "") {
+      setError("Fill in a score between 0.1 and 10.");
       return;
     }
+
+    const parsed = Number(text);
+
+    if (Number.isNaN(parsed)) {
+      setError("Fill in a score between 0.1 and 10.");
+      return;
+    }
+
     const finalScore = clampScore(parsed);
     setError(null);
+
     startTransition(async () => {
       const res = await rateItem({
         itemType,
@@ -87,24 +105,31 @@ export function RatingControl({
         itemArtist,
         itemImageUrl,
       });
+
       if (res.ok && typeof res.score === "number") {
         setScore(res.score);
+        setDraft(res.score);
+        setText(res.score.toFixed(1));
         setOpen(false);
       } else {
-        setError(res.error ?? "Er ging iets mis.");
+        setError(res.error ?? "Something went wrong.");
       }
     });
   }
 
   function clear() {
     setError(null);
+
     startTransition(async () => {
       const res = await removeRating({ itemType, itemId });
+
       if (res.ok) {
         setScore(null);
+        setDraft(DEFAULT_DRAFT);
+        setText(DEFAULT_DRAFT.toFixed(1));
         setOpen(false);
       } else {
-        setError(res.error ?? "Er ging iets mis.");
+        setError(res.error ?? "Something went wrong.");
       }
     });
   }
@@ -168,8 +193,18 @@ export function RatingControl({
                 value={text}
                 onChange={(e) => onText(e.target.value)}
                 onBlur={() => {
+                  if (text.trim() === "") {
+                    setText((score ?? DEFAULT_DRAFT).toFixed(1));
+                    setDraft(score ?? DEFAULT_DRAFT);
+                    return;
+                  }
+
                   const parsed = Number(text);
-                  if (!Number.isNaN(parsed)) setText(clampScore(parsed).toFixed(1));
+                  if (!Number.isNaN(parsed)) {
+                    const clamped = clampScore(parsed);
+                    setDraft(clamped);
+                    setText(clamped.toFixed(1));
+                  }
                 }}
                 aria-label="Score"
                 className="w-16 rounded-lg bg-white/[0.04] px-2 py-1 text-right text-2xl font-semibold tabular-nums outline-none focus:bg-white/[0.07]"
@@ -188,7 +223,7 @@ export function RatingControl({
               style={{ background: SCORE_TRACK_GRADIENT }}
             />
             <div className="mt-1 flex justify-between text-[10px] text-white/30">
-              <span>0</span>
+              <span>0.1</span>
               <span>10</span>
             </div>
 
@@ -203,6 +238,7 @@ export function RatingControl({
               >
                 {isPending ? "Saving..." : "Save"}
               </button>
+
               {hasScore ? (
                 <button
                   type="button"

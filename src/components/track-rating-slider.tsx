@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { rateItem } from "@/app/actions/ratings";
+import { rateItem, removeRating } from "@/app/actions/ratings";
 import { scoreColor, SCORE_TRACK_GRADIENT } from "@/lib/score-color";
 
 type Props = {
@@ -12,6 +12,11 @@ type Props = {
   initialScore: number | null;
 };
 
+const MIN_SCORE = 0.1;
+const MAX_SCORE = 10;
+const STEP = 0.1;
+const DEFAULT_DRAFT = 7;
+
 const SLIDER_CLASSES =
   "h-1.5 w-full cursor-pointer appearance-none rounded-full " +
   "[&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent " +
@@ -20,7 +25,7 @@ const SLIDER_CLASSES =
   "[&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-white";
 
 function clampScore(n: number): number {
-  return Math.min(10, Math.max(0, Math.round(n * 10) / 10));
+  return Math.min(MAX_SCORE, Math.max(MIN_SCORE, Math.round(n * 10) / 10));
 }
 
 export function TrackRatingSlider({
@@ -30,7 +35,7 @@ export function TrackRatingSlider({
   itemImageUrl,
   initialScore,
 }: Props) {
-  const [draft, setDraft] = useState<number>(initialScore ?? 0);
+  const [draft, setDraft] = useState<number>(initialScore ?? DEFAULT_DRAFT);
   const [text, setText] = useState<string>(
     initialScore !== null ? initialScore.toFixed(1) : ""
   );
@@ -43,6 +48,7 @@ export function TrackRatingSlider({
     const finalScore = clampScore(value);
     setDraft(finalScore);
     setText(finalScore.toFixed(1));
+
     startTransition(async () => {
       const res = await rateItem({
         itemType: "track",
@@ -52,31 +58,64 @@ export function TrackRatingSlider({
         itemArtist,
         itemImageUrl,
       });
-      if (res.ok && typeof res.score === "number") setRated(true);
+
+      if (res.ok && typeof res.score === "number") {
+        setDraft(res.score);
+        setText(res.score.toFixed(1));
+        setRated(true);
+      }
+    });
+  }
+
+  function removeTrackRating() {
+    startTransition(async () => {
+      const res = await removeRating({
+        itemType: "track",
+        itemId,
+      });
+
+      if (res.ok) {
+        setDraft(DEFAULT_DRAFT);
+        setText("");
+        setRated(false);
+      }
     });
   }
 
   function onSlider(value: number) {
-    setDraft(value);
-    setText(value.toFixed(1));
+    const clamped = clampScore(value);
+    setDraft(clamped);
+    setText(clamped.toFixed(1));
   }
 
   function onText(value: string) {
     setText(value);
+
+    if (value === "") {
+      return;
+    }
+
     const parsed = Number(value);
-    if (value !== "" && !Number.isNaN(parsed)) setDraft(clampScore(parsed));
+    if (!Number.isNaN(parsed)) {
+      setDraft(clampScore(parsed));
+    }
   }
 
   function commitFromText() {
     if (text === "") {
-      if (rated) setText(draft.toFixed(1)); // herstel naar opgeslagen score
+      if (rated) {
+        setText(draft.toFixed(1));
+      }
       return;
     }
+
     const parsed = Number(text);
+
     if (Number.isNaN(parsed)) {
       setText(rated ? draft.toFixed(1) : "");
       return;
     }
+
     commit(parsed);
   }
 
@@ -91,27 +130,45 @@ export function TrackRatingSlider({
         onChange={(e) => onText(e.target.value)}
         onBlur={commitFromText}
         onKeyDown={(e) => {
-          if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+          if (e.key === "Enter") {
+            (e.target as HTMLInputElement).blur();
+          }
         }}
         className="w-10 rounded-md bg-transparent px-1 py-0.5 text-right text-xs font-semibold tabular-nums outline-none placeholder:text-white/30 focus:bg-white/[0.06]"
         style={{ color: showColor ? scoreColor(draft) : undefined }}
       />
+
       <div className="w-14 transition-[width] duration-200 ease-out group-hover:w-36 focus-within:w-36">
         <input
           type="range"
-          min={0}
-          max={10}
-          step={0.1}
+          min={MIN_SCORE}
+          max={MAX_SCORE}
+          step={STEP}
           value={draft}
           disabled={isPending}
           aria-label={`Rate ${itemName}`}
           onChange={(e) => onSlider(Number(e.target.value))}
-          onPointerUp={(e) => commit(Number((e.target as HTMLInputElement).value))}
+          onPointerUp={(e) =>
+            commit(Number((e.target as HTMLInputElement).value))
+          }
           onKeyUp={(e) => commit(Number((e.target as HTMLInputElement).value))}
           className={SLIDER_CLASSES}
           style={{ background: SCORE_TRACK_GRADIENT }}
         />
       </div>
+
+      {rated ? (
+        <button
+          type="button"
+          onClick={removeTrackRating}
+          disabled={isPending}
+          aria-label={`Remove rating for ${itemName}`}
+          title="Remove rating"
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-xs font-medium text-white/35 opacity-0 transition hover:border-red-300/30 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-40 group-hover:opacity-100 focus:opacity-100"
+        >
+          ×
+        </button>
+      ) : null}
     </div>
   );
 }
