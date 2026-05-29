@@ -78,11 +78,9 @@ const USER_RANKS: Rank[] = [
     name: "Newcomer",
     minPoints: 0,
     emblem: "◌",
-    colorClasses:
-      "border-slate-400/20 bg-slate-500/10 text-slate-100",
-    emblemClasses:
-      "border-slate-300/20 bg-slate-400/15 text-slate-100",
-    description: "Just getting started on Melodic.",
+    colorClasses: "border-slate-400/20 bg-slate-500/10 text-slate-100",
+    emblemClasses: "border-slate-300/20 bg-slate-400/15 text-slate-100",
+    description: "Your first step into Melodic.",
   },
 
   {
@@ -90,33 +88,27 @@ const USER_RANKS: Rank[] = [
     name: "Rookie Listener I",
     minPoints: 250,
     emblem: "♪",
-    colorClasses:
-      "border-sky-400/20 bg-sky-500/10 text-sky-100",
-    emblemClasses:
-      "border-sky-300/20 bg-sky-400/15 text-sky-100",
-    description: "Finding an early rhythm through ratings.",
+    colorClasses: "border-sky-400/20 bg-sky-500/10 text-sky-100",
+    emblemClasses: "border-sky-300/20 bg-sky-400/15 text-sky-100",
+    description: "Starting to build a listening identity.",
   },
   {
     id: "rookie_listener_2",
     name: "Rookie Listener II",
     minPoints: 750,
     emblem: "♫",
-    colorClasses:
-      "border-sky-400/20 bg-sky-500/10 text-sky-100",
-    emblemClasses:
-      "border-sky-300/20 bg-sky-400/20 text-sky-100",
-    description: "Listening more actively and building momentum.",
+    colorClasses: "border-sky-400/20 bg-sky-500/10 text-sky-100",
+    emblemClasses: "border-sky-300/20 bg-sky-400/20 text-sky-100",
+    description: "Your ratings are becoming more consistent.",
   },
   {
     id: "rookie_listener_3",
     name: "Rookie Listener III",
     minPoints: 1500,
     emblem: "♬",
-    colorClasses:
-      "border-sky-400/20 bg-sky-500/10 text-sky-100",
-    emblemClasses:
-      "border-sky-300/20 bg-sky-400/25 text-sky-50",
-    description: "Well beyond the first few spins.",
+    colorClasses: "border-sky-400/20 bg-sky-500/10 text-sky-100",
+    emblemClasses: "border-sky-300/20 bg-sky-400/25 text-sky-50",
+    description: "You are no longer just passing through.",
   },
 
   {
@@ -124,33 +116,27 @@ const USER_RANKS: Rank[] = [
     name: "Album Scout I",
     minPoints: 3000,
     emblem: "▣",
-    colorClasses:
-      "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
-    emblemClasses:
-      "border-emerald-300/20 bg-emerald-400/15 text-emerald-100",
-    description: "Actively scouting albums worth ranking.",
+    colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
+    emblemClasses: "border-emerald-300/20 bg-emerald-400/15 text-emerald-100",
+    description: "You are actively scouting albums and projects.",
   },
   {
     id: "album_scout_2",
     name: "Album Scout II",
     minPoints: 6000,
     emblem: "▤",
-    colorClasses:
-      "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
-    emblemClasses:
-      "border-emerald-300/20 bg-emerald-400/20 text-emerald-100",
-    description: "A more confident explorer of album territory.",
+    colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
+    emblemClasses: "border-emerald-300/20 bg-emerald-400/20 text-emerald-100",
+    description: "Your catalog is getting wider.",
   },
   {
     id: "album_scout_3",
     name: "Album Scout III",
     minPoints: 10000,
     emblem: "▥",
-    colorClasses:
-      "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
-    emblemClasses:
-      "border-emerald-300/20 bg-emerald-400/25 text-emerald-50",
-    description: "Scouting catalogues with real intent.",
+    colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
+    emblemClasses: "border-emerald-300/20 bg-emerald-400/25 text-emerald-50",
+    description: "You are exploring with real intent.",
   },
 
   {
@@ -158,33 +144,27 @@ const USER_RANKS: Rank[] = [
     name: "Catalog Curator I",
     minPoints: 17500,
     emblem: "▦",
-    colorClasses:
-      "border-amber-400/20 bg-amber-500/10 text-amber-100",
-    emblemClasses:
-      "border-amber-300/20 bg-amber-400/15 text-amber-100",
-    description: "Shaping a more serious music library.",
+    colorClasses: "border-amber-400/20 bg-amber-500/10 text-amber-100",
+    emblemClasses: "border-amber-300/20 bg-amber-400/15 text-amber-100",
+    description: "Your profile is becoming a curated music catalog.",
   },
   {
     id: "catalog_curator_2",
     name: "Catalog Curator II",
     minPoints: 30000,
     emblem: "▧",
-    colorClasses:
-      "border-amber-400/20 bg-amber-500/10 text-amber-100",
-    emblemClasses:
-      "border-amber-300/20 bg-amber-400/20 text-amber-100",
-    description: "Curating a recognizable and growing catalogue.",
+    colorClasses: "border-amber-400/20 bg-amber-500/10 text-amber-100",
+    emblemClasses: "border-amber-300/20 bg-amber-400/20 text-amber-100",
+    description: "Your taste archive is gaining depth.",
   },
   {
     id: "catalog_curator_3",
     name: "Catalog Curator III",
     minPoints: 50000,
     emblem: "▩",
-    colorClasses:
-      "border-amber-400/20 bg-amber-500/10 text-amber-100",
-    emblemClasses:
-      "border-amber-300/20 bg-amber-400/25 text-amber-50",
-    description: "A strong catalog taste profile is taking shape.",
+    colorClasses: "border-amber-400/20 bg-amber-500/10 text-amber-100",
+    emblemClasses: "border-amber-300/20 bg-amber-400/25 text-amber-50",
+    description: "A serious and recognizable catalog is forming.",
   },
 
   {
@@ -192,33 +172,27 @@ const USER_RANKS: Rank[] = [
     name: "Certified Critic I",
     minPoints: 75000,
     emblem: "✎",
-    colorClasses:
-      "border-rose-400/20 bg-rose-500/10 text-rose-100",
-    emblemClasses:
-      "border-rose-300/20 bg-rose-400/15 text-rose-100",
-    description: "Your scores start to carry real weight.",
+    colorClasses: "border-rose-400/20 bg-rose-500/10 text-rose-100",
+    emblemClasses: "border-rose-300/20 bg-rose-400/15 text-rose-100",
+    description: "Your scores start to carry weight.",
   },
   {
     id: "certified_critic_2",
     name: "Certified Critic II",
     minPoints: 110000,
     emblem: "✐",
-    colorClasses:
-      "border-rose-400/20 bg-rose-500/10 text-rose-100",
-    emblemClasses:
-      "border-rose-300/20 bg-rose-400/20 text-rose-100",
-    description: "A sharper eye and a stronger point of view.",
+    colorClasses: "border-rose-400/20 bg-rose-500/10 text-rose-100",
+    emblemClasses: "border-rose-300/20 bg-rose-400/20 text-rose-100",
+    description: "Sharper ratings and stronger opinions.",
   },
   {
     id: "certified_critic_3",
     name: "Certified Critic III",
     minPoints: 160000,
     emblem: "✒",
-    colorClasses:
-      "border-rose-400/20 bg-rose-500/10 text-rose-100",
-    emblemClasses:
-      "border-rose-300/20 bg-rose-400/25 text-rose-50",
-    description: "You rate like someone with standards.",
+    colorClasses: "border-rose-400/20 bg-rose-500/10 text-rose-100",
+    emblemClasses: "border-rose-300/20 bg-rose-400/25 text-rose-50",
+    description: "A serious voice in music ranking.",
   },
 
   {
@@ -226,21 +200,17 @@ const USER_RANKS: Rank[] = [
     name: "Vibe Virtuoso I",
     minPoints: 225000,
     emblem: "✦",
-    colorClasses:
-      "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
-    emblemClasses:
-      "border-fuchsia-300/20 bg-fuchsia-400/15 text-fuchsia-100",
-    description: "Your taste has become unmistakable.",
+    colorClasses: "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
+    emblemClasses: "border-fuchsia-300/20 bg-fuchsia-400/15 text-fuchsia-100",
+    description: "Your taste has a clear signature.",
   },
   {
     id: "vibe_virtuoso_2",
     name: "Vibe Virtuoso II",
     minPoints: 325000,
     emblem: "✶",
-    colorClasses:
-      "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
-    emblemClasses:
-      "border-fuchsia-300/20 bg-fuchsia-400/20 text-fuchsia-100",
+    colorClasses: "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
+    emblemClasses: "border-fuchsia-300/20 bg-fuchsia-400/20 text-fuchsia-100",
     description: "You shape mood and taste with confidence.",
   },
   {
@@ -248,10 +218,8 @@ const USER_RANKS: Rank[] = [
     name: "Vibe Virtuoso III",
     minPoints: 450000,
     emblem: "✷",
-    colorClasses:
-      "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
-    emblemClasses:
-      "border-fuchsia-300/20 bg-fuchsia-400/25 text-fuchsia-50",
+    colorClasses: "border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-100",
+    emblemClasses: "border-fuchsia-300/20 bg-fuchsia-400/25 text-fuchsia-50",
     description: "A rare level of taste presence.",
   },
 
@@ -260,10 +228,8 @@ const USER_RANKS: Rank[] = [
     name: "Sonic Visionary I",
     minPoints: 600000,
     emblem: "◐",
-    colorClasses:
-      "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
-    emblemClasses:
-      "border-indigo-300/20 bg-indigo-400/15 text-indigo-100",
+    colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
+    emblemClasses: "border-indigo-300/20 bg-indigo-400/15 text-indigo-100",
     description: "You see patterns in music most listeners miss.",
   },
   {
@@ -271,10 +237,8 @@ const USER_RANKS: Rank[] = [
     name: "Sonic Visionary II",
     minPoints: 850000,
     emblem: "◑",
-    colorClasses:
-      "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
-    emblemClasses:
-      "border-indigo-300/20 bg-indigo-400/20 text-indigo-100",
+    colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
+    emblemClasses: "border-indigo-300/20 bg-indigo-400/20 text-indigo-100",
     description: "A very high-status music identity.",
   },
   {
@@ -282,10 +246,8 @@ const USER_RANKS: Rank[] = [
     name: "Sonic Visionary III",
     minPoints: 1150000,
     emblem: "◉",
-    colorClasses:
-      "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
-    emblemClasses:
-      "border-indigo-300/20 bg-indigo-400/25 text-indigo-50",
+    colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
+    emblemClasses: "border-indigo-300/20 bg-indigo-400/25 text-indigo-50",
     description: "Almost untouchable taste territory.",
   },
 
@@ -294,10 +256,8 @@ const USER_RANKS: Rank[] = [
     name: "Melodic Legend",
     minPoints: 1500000,
     emblem: "✪",
-    colorClasses:
-      "border-violet-400/25 bg-violet-500/10 text-violet-100",
-    emblemClasses:
-      "border-violet-300/25 bg-violet-400/25 text-violet-50",
+    colorClasses: "border-violet-400/25 bg-violet-500/10 text-violet-100",
+    emblemClasses: "border-violet-300/25 bg-violet-400/25 text-violet-50",
     description: "The rarest status in Melodic.",
   },
 ];
@@ -354,11 +314,6 @@ export function ProfilePageClient({
   const currentRank = useMemo(() => getCurrentRank(points), [points]);
   const nextRank = useMemo(() => getNextRank(points), [points]);
 
-  const stats = [
-    { label: "Albums", value: albumRankings.toLocaleString() },
-    { label: "Tracks", value: trackRankings.toLocaleString() },
-  ];
-
   return (
     <main className="min-h-screen bg-[#05050d] text-white">
       <div
@@ -379,15 +334,12 @@ export function ProfilePageClient({
         </Link>
 
         <section className="mt-8 overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-2xl">
-          <div className="relative h-24 overflow-hidden bg-violet-700/20 md:h-28">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.14),transparent_25%),radial-gradient(circle_at_75%_10%,rgba(168,85,247,0.18),transparent_28%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0b0b14] to-transparent" />
-          </div>
+          <div className="h-16 bg-violet-700/20 md:h-20" />
 
-          <div className="px-5 pb-5 md:px-7 md:pb-6">
-            <div className="-mt-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:gap-5">
-                <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#080810] text-3xl font-semibold text-white/45 ring-4 ring-[#0b0b14] md:h-24 md:w-24">
+          <div className="px-5 py-5 md:px-7">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex min-w-0 items-center gap-4">
+                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#080810] text-2xl font-semibold text-white/45">
                   {profile.avatarUrl ? (
                     <img
                       src={profile.avatarUrl}
@@ -399,9 +351,9 @@ export function ProfilePageClient({
                   )}
                 </div>
 
-                <div className="min-w-0 pb-1">
+                <div className="min-w-0">
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <h1 className="max-w-full break-words text-3xl font-semibold leading-tight tracking-tight md:text-[2rem]">
+                    <h1 className="max-w-full break-words text-2xl font-semibold leading-[1.25] tracking-tight text-white md:text-3xl">
                       {profile.displayName}
                     </h1>
 
@@ -412,7 +364,7 @@ export function ProfilePageClient({
                     ) : null}
                   </div>
 
-                  <p className="mt-1 break-words text-sm text-white/45">
+                  <p className="mt-1 break-words text-sm leading-relaxed text-white/45">
                     @{profile.username}
                   </p>
                 </div>
@@ -432,8 +384,8 @@ export function ProfilePageClient({
               </p>
             </div>
 
-            <div className="mt-5 border-t border-white/[0.06] pt-4">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="mt-4 border-t border-white/[0.06] pt-4">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-white/35">
                   Profile progress
                 </p>
@@ -446,76 +398,56 @@ export function ProfilePageClient({
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
-                <div className="grid grid-cols-3 gap-3">
-                  {stats.map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="rounded-2xl border border-white/[0.06] bg-black/20 px-4 py-3 text-center"
-                    >
-                      <p className="text-[10px] uppercase tracking-wider text-white/35">
-                        {stat.label}
-                      </p>
-                      <p className="mt-1 text-xl font-semibold tabular-nums text-white">
-                        {stat.value}
-                      </p>
-                    </div>
-                  ))}
-
-                  <button
-                    type="button"
-                    onClick={() => setIsRankModalOpen(true)}
-                    className="rounded-2xl border border-white/[0.06] bg-black/20 px-4 py-3 text-center transition hover:border-violet-400/30 hover:bg-violet-500/[0.06]"
-                  >
-                    <p className="text-[10px] uppercase tracking-wider text-white/35">
-                      Points
-                    </p>
-                    <p className="mt-1 text-xl font-semibold tabular-nums text-white">
-                      {points.toLocaleString()}
-                    </p>
-                    <p className="mt-1 text-[11px] text-violet-200/80">
-                      View ranks
-                    </p>
-                  </button>
+              <div className="grid grid-cols-2 gap-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_220px]">
+                <div className="rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2 text-center">
+                  <p className="text-[9px] uppercase tracking-wider text-white/35">
+                    Albums
+                  </p>
+                  <p className="mt-0.5 text-lg font-semibold tabular-nums text-white">
+                    {albumRankings.toLocaleString()}
+                  </p>
                 </div>
+
+                <div className="rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2 text-center">
+                  <p className="text-[9px] uppercase tracking-wider text-white/35">
+                    Tracks
+                  </p>
+                  <p className="mt-0.5 text-lg font-semibold tabular-nums text-white">
+                    {trackRankings.toLocaleString()}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsRankModalOpen(true)}
+                  className="rounded-xl border border-violet-300/20 bg-violet-500/10 px-3 py-2 text-center transition hover:border-violet-300/40 hover:bg-violet-500/15"
+                >
+                  <p className="text-[9px] uppercase tracking-wider text-violet-200/60">
+                    Points
+                  </p>
+                  <p className="mt-0.5 text-lg font-semibold tabular-nums text-white">
+                    {points.toLocaleString()}
+                  </p>
+                </button>
 
                 <Link
                   href="/profile/badges"
-                  className="group rounded-2xl border border-white/[0.06] bg-black/20 px-4 py-3 transition hover:border-violet-400/30 hover:bg-violet-500/[0.06]"
+                  className="rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2 transition hover:border-violet-400/30 hover:bg-violet-500/[0.06]"
                 >
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-[10px] uppercase tracking-wider text-white/35">
+                      <p className="text-[9px] uppercase tracking-wider text-white/35">
                         Badges
                       </p>
-                      <p className="mt-1 text-sm font-semibold text-white">
+                      <p className="mt-0.5 text-sm font-semibold text-white">
                         {unlockedBadges.length} unlocked
                       </p>
                     </div>
 
-                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-white/45 transition group-hover:border-violet-400/30 group-hover:text-violet-200">
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-white/45">
                       View
                     </span>
                   </div>
-
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {BADGES.slice(0, 3).map((badge) => (
-                      <span
-                        key={badge.id}
-                        className={
-                          badge.unlocked
-                            ? "rounded-full border border-violet-300/30 bg-violet-500/15 px-2 py-0.5 text-[11px] text-violet-100"
-                            : "rounded-full border border-white/[0.06] bg-white/[0.03] px-2 py-0.5 text-[11px] text-white/30"
-                        }
-                      >
-                        {badge.name}
-                      </span>
-                    ))}
-                  </div>
-
-                  <p className="mt-2 text-xs leading-relaxed text-white/35">
-                    Unlock badges by ranking music.
-                  </p>
                 </Link>
               </div>
             </div>
@@ -700,13 +632,17 @@ export function ProfilePageClient({
                   <p className="text-[11px] uppercase tracking-wider text-white/35">
                     Next rank
                   </p>
+
                   {nextRank ? (
                     <>
                       <p className="mt-2 text-sm font-semibold text-white">
                         {nextRank.name}
                       </p>
                       <p className="mt-1 text-xs text-white/45">
-                        {Math.max(nextRank.minPoints - points, 0).toLocaleString()}{" "}
+                        {Math.max(
+                          nextRank.minPoints - points,
+                          0
+                        ).toLocaleString()}{" "}
                         points to go
                       </p>
                     </>
@@ -737,14 +673,16 @@ export function ProfilePageClient({
                         isCurrent
                           ? `${rank.colorClasses} ring-1 ring-white/10`
                           : unlocked
-                            ? `${rank.colorClasses}`
+                            ? rank.colorClasses
                             : "border-white/[0.06] bg-white/[0.02] text-white/40"
                       }`}
                     >
                       <div className="flex items-start gap-4">
                         <div
                           className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border text-2xl font-semibold ${
-                            unlocked ? rank.emblemClasses : "border-white/10 bg-white/[0.03] text-white/30"
+                            unlocked
+                              ? rank.emblemClasses
+                              : "border-white/10 bg-white/[0.03] text-white/30"
                           }`}
                         >
                           {rank.emblem}
