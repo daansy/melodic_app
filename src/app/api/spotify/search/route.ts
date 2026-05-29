@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_SEARCH_URL = "https://api.spotify.com/v1/search";
-const SEARCH_RESULT_LIMIT = 20;
-const SEARCH_MARKET = "NL";
+const SEARCH_RESULT_LIMIT = 50; // ruime pool ophalen, daarna filteren we op relevantie
 const MIN_QUERY_LENGTH = 2;
 
 type SpotifyTokenCache = {
@@ -16,10 +15,20 @@ type SpotifyImage = { url: string };
 type SpotifyAlbumItem = {
   id: string;
   name: string;
+  album_type?: string;
   artists?: SpotifyArtist[];
   images?: SpotifyImage[];
   release_date?: string;
   total_tracks?: number;
+};
+
+type AlbumResult = {
+  id: string;
+  name: string;
+  artist: string;
+  imageUrl: string | null;
+  releaseYear: string;
+  totalTracks: number;
 };
 
 // Eenvoudige cache zodat we niet bij elke zoekopdracht een nieuw token ophalen.
@@ -71,14 +80,42 @@ async function getAccessToken(): Promise<string> {
   return cachedToken.accessToken;
 }
 
-async function searchAlbums(query: string) {
+function mapAlbum(album: SpotifyAlbumItem): AlbumResult {
+  return {
+    id: album.id,
+    name: album.name,
+    artist: album.artists?.map((a) => a.name).join(", ") ?? "",
+    imageUrl: album.images?.[0]?.url ?? null,
+    releaseYear: album.release_date ? album.release_date.slice(0, 4) : "",
+    totalTracks: album.total_tracks ?? 0,
+  };
+}
+
+function removeDuplicates(albums: AlbumResult[]): AlbumResult[] {
+  const seen = new Set<string>();
+  const unique: AlbumResult[] = [];
+  for (const album of albums) {
+    const key = `${album.name.toLowerCase()}|${album.artist.toLowerCase()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(album);
+    }
+  }
+  return unique;
+}
+
+function matchesAllWords(album: AlbumResult, queryWords: string[]): boolean {
+  const haystack = `${album.artist} ${album.name}`.toLowerCase();
+  return queryWords.every((word) => haystack.includes(word));
+}
+
+async function searchAlbums(query: string): Promise<AlbumResult[]> {
   const token = await getAccessToken();
 
   const url = new URL(SPOTIFY_SEARCH_URL);
   url.searchParams.set("q", query);
   url.searchParams.set("type", "album");
-
-  console.log("Spotify search URL:", url.toString());
+  url.searchParams.set("limit", String(SEARCH_RESULT_LIMIT));
 
   const response = await fetch(url.toString(), {
     headers: { Authorization: `Bearer ${token}` },
@@ -94,14 +131,18 @@ async function searchAlbums(query: string) {
   const data = await response.json();
   const items: SpotifyAlbumItem[] = data.albums?.items ?? [];
 
-  return items.map((album) => ({
-    id: album.id,
-    name: album.name,
-    artist: album.artists?.map((a) => a.name).join(", ") ?? "",
-    imageUrl: album.images?.[0]?.url ?? null,
-    releaseYear: album.release_date ? album.release_date.slice(0, 4) : "",
-    totalTracks: album.total_tracks ?? 0,
-  }));
+  // 1. Alleen echte albums, geen losse singles.
+  const onlyAlbums = items.filter((item) => item.album_type === "album");
+
+  // 2. Omvormen naar onze eigen vorm en dubbele edities samenvoegen.
+  const mapped = removeDuplicates(onlyAlbums.map(mapAlbum));
+
+  // 3. Relevantiefilter: elk zoekwoord moet in de artiest of titel voorkomen.
+  const queryWords = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const relevant = mapped.filter((album) => matchesAllWords(album, queryWords));
+
+  // 4. Laat het filter niets over, dan tonen we toch de albums zonder dat filter.
+  return relevant.length > 0 ? relevant : mapped;
 }
 
 export async function GET(request: Request) {
