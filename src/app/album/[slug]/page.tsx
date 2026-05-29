@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAlbum } from "@/lib/spotify";
-import { getMyRating, getMyRatings } from "@/lib/ratings";
+import { getMyRatingWithReview, getMyRatings } from "@/lib/ratings";
 import { RatingControl } from "@/components/rating-control";
 import { TrackRatingSlider } from "@/components/track-rating-slider";
 
@@ -19,6 +19,7 @@ export default async function AlbumPage({
 }) {
   const { slug } = await params;
   const album = await getAlbum(slug);
+
   if (!album) {
     notFound();
   }
@@ -37,7 +38,7 @@ export default async function AlbumPage({
   const trackIds = album.tracks.map((t) => t.id);
 
   const [albumRating, trackRatings] = await Promise.all([
-    getMyRating("album", album.id),
+    getMyRatingWithReview("album", album.id),
     showTrackRating
       ? getMyRatings("track", trackIds)
       : Promise.resolve({} as Record<string, number>),
@@ -113,7 +114,8 @@ export default async function AlbumPage({
               itemName={album.name}
               itemArtist={artistText}
               itemImageUrl={album.imageUrl}
-              initialScore={albumRating}
+              initialScore={albumRating?.score ?? null}
+              initialReviewText={albumRating?.reviewText ?? null}
               label={rateLabel}
             />
           </div>
@@ -125,6 +127,7 @@ export default async function AlbumPage({
               const features = track.artists.filter(
                 (a) => !albumArtistIds.has(a.id)
               );
+
               return (
                 <li
                   key={track.id}

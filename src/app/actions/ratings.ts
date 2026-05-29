@@ -2,8 +2,9 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-const MIN_SCORE = 0;
+const MIN_SCORE = 0.1;
 const MAX_SCORE = 10;
+const MAX_REVIEW_LENGTH = 500;
 
 type ItemType = "album" | "track";
 
@@ -14,20 +15,36 @@ type RateInput = {
   itemName: string;
   itemArtist: string;
   itemImageUrl: string | null;
+  reviewText?: string | null;
 };
+
+function cleanReviewText(value: string | null | undefined): string | null {
+  if (!value) return null;
+
+  const cleaned = value.trim().slice(0, MAX_REVIEW_LENGTH);
+  return cleaned.length > 0 ? cleaned : null;
+}
 
 export async function rateItem(
   input: RateInput
-): Promise<{ ok: boolean; score?: number; error?: string }> {
+): Promise<{ ok: boolean; score?: number; reviewText?: string | null; error?: string }> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (!user) return { ok: false, error: "Je bent niet ingelogd." };
 
   let score = Math.round(input.score * 10) / 10;
-  if (Number.isNaN(score)) return { ok: false, error: "Ongeldige score." };
+
+  if (Number.isNaN(score)) {
+    return { ok: false, error: "Ongeldige score." };
+  }
+
   score = Math.min(MAX_SCORE, Math.max(MIN_SCORE, score));
+
+  const reviewText =
+    input.itemType === "album" ? cleanReviewText(input.reviewText) : null;
 
   const { error } = await supabase.from("ratings").upsert(
     {
@@ -38,6 +55,7 @@ export async function rateItem(
       item_name: input.itemName,
       item_artist: input.itemArtist,
       item_image_url: input.itemImageUrl,
+      review_text: reviewText,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id,item_type,item_id" }
@@ -47,7 +65,8 @@ export async function rateItem(
     console.error("rateItem failed:", error.message);
     return { ok: false, error: "Opslaan mislukt." };
   }
-  return { ok: true, score };
+
+  return { ok: true, score, reviewText };
 }
 
 export async function removeRating(input: {
@@ -58,6 +77,7 @@ export async function removeRating(input: {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (!user) return { ok: false, error: "Je bent niet ingelogd." };
 
   const { error } = await supabase
@@ -71,6 +91,7 @@ export async function removeRating(input: {
     console.error("removeRating failed:", error.message);
     return { ok: false, error: "Verwijderen mislukt." };
   }
+
   return { ok: true };
 }
 
@@ -83,9 +104,11 @@ export async function getRatingsForItems(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (!user) return {};
 
   const ids = Array.from(new Set(items.map((i) => i.itemId)));
+
   const { data, error } = await supabase
     .from("ratings")
     .select("item_type, item_id, score")
@@ -95,8 +118,10 @@ export async function getRatingsForItems(
   if (error || !data) return {};
 
   const map: Record<string, number> = {};
+
   for (const row of data) {
     map[`${row.item_type}:${row.item_id}`] = Number(row.score);
   }
+
   return map;
 }
