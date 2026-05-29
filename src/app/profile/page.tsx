@@ -2,6 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+const BADGES: Record<string, { name: string; symbol: string }> = {
+  early_member: { name: "Early Member", symbol: "✦" },
+};
+
 export default async function ProfilePage() {
   const supabase = await createClient();
 
@@ -15,7 +19,9 @@ export default async function ProfilePage() {
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("username, display_name, avatar_url, bio, onboarding_completed")
+    .select(
+      "username, display_name, avatar_url, bio, featured_badge_id, onboarding_completed"
+    )
     .eq("id", user.id)
     .single();
 
@@ -28,6 +34,10 @@ export default async function ProfilePage() {
 
   const avatarInitial =
     displayName?.[0]?.toUpperCase() || username?.[0]?.toUpperCase() || "M";
+
+  const featuredBadge = profile.featured_badge_id
+    ? BADGES[profile.featured_badge_id] ?? null
+    : null;
 
   const albumRankings = 0;
   const trackRankings = 0;
@@ -89,9 +99,19 @@ export default async function ProfilePage() {
                 </div>
 
                 <div className="min-w-0 pb-1">
-                  <h1 className="max-w-full break-words text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
-                    {displayName}
-                  </h1>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <h1 className="min-w-0 max-w-full break-words text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
+                      {displayName}
+                    </h1>
+
+                    {featuredBadge ? (
+                      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-violet-300/30 bg-violet-500/15 px-3 py-1 text-xs font-medium text-violet-100">
+                        <span aria-hidden>{featuredBadge.symbol}</span>
+                        {featuredBadge.name}
+                      </span>
+                    ) : null}
+                  </div>
+
                   <p className="mt-1 break-words text-sm text-white/45">
                     @{username}
                   </p>
