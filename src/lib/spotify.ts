@@ -1,6 +1,7 @@
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token";
 const SPOTIFY_API_BASE = "https://api.spotify.com/v1";
 const EP_MIN_TRACKS = 3; // album_type 'single' met >= dit aantal nummers tonen we als EP
+const SPOTIFY_MARKET = "US"; // één markt => één vermelding per album i.p.v. duplicaten per land
 const ALBUM_PAGE_SIZE = 20; // Spotify's standaard; we sturen GEEN 'limit'
 const ALBUM_GROUP_MAX_PAGES = 10; // veiligheidsgrens voor albums (20 per pagina)
 const SINGLE_GROUP_MAX_PAGES = 6; // veiligheidsgrens voor singles/EP's
