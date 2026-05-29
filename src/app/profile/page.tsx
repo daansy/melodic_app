@@ -152,15 +152,15 @@ export default async function ProfilePage() {
         </Link>
 
         <section className="mt-8 overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-2xl">
-          <div className="relative h-32 overflow-hidden bg-gradient-to-r from-violet-700/40 via-fuchsia-600/20 to-indigo-600/30 md:h-36">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18),transparent_25%),radial-gradient(circle_at_75%_10%,rgba(168,85,247,0.28),transparent_28%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0b0b14] to-transparent" />
+          <div className="relative h-24 overflow-hidden bg-gradient-to-r from-violet-700/40 via-fuchsia-600/20 to-indigo-600/30 md:h-28">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.16),transparent_25%),radial-gradient(circle_at_75%_10%,rgba(168,85,247,0.25),transparent_28%)]" />
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0b0b14] to-transparent" />
           </div>
 
-          <div className="px-5 pb-6 md:px-7 md:pb-7">
-            <div className="-mt-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div className="px-5 pb-5 md:px-7 md:pb-6">
+            <div className="-mt-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:gap-5">
-                <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[#080810] text-4xl font-semibold text-white/45 ring-4 ring-[#0b0b14] md:h-28 md:w-28">
+                <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#080810] text-3xl font-semibold text-white/45 ring-4 ring-[#0b0b14] md:h-24 md:w-24">
                   {profile.avatar_url ? (
                     <img
                       src={profile.avatar_url}
@@ -174,12 +174,12 @@ export default async function ProfilePage() {
 
                 <div className="min-w-0 pb-1">
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <h1 className="max-w-full break-words text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
+                    <h1 className="max-w-full break-words text-3xl font-semibold leading-tight tracking-tight md:text-[2rem]">
                       {displayName}
                     </h1>
 
                     {featuredBadge ? (
-                      <span className="shrink-0 rounded-full border border-violet-300/30 bg-violet-500/15 px-3 py-1 text-xs font-medium text-violet-100">
+                      <span className="shrink-0 rounded-full border border-violet-300/30 bg-violet-500/15 px-2.5 py-1 text-[11px] font-medium text-violet-100">
                         {featuredBadge.symbol} {featuredBadge.name}
                       </span>
                     ) : null}
@@ -199,13 +199,13 @@ export default async function ProfilePage() {
               </Link>
             </div>
 
-            <div className="mt-5 max-w-2xl">
+            <div className="mt-4 max-w-2xl">
               <p className="text-sm leading-relaxed text-white/60">
                 {profile.bio || "No bio yet."}
               </p>
             </div>
 
-            <div className="mt-6 border-t border-white/[0.06] pt-5">
+            <div className="mt-5 border-t border-white/[0.06] pt-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-white/35">
                   Profile progress
@@ -219,7 +219,7 @@ export default async function ProfilePage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
                 <dl className="grid grid-cols-3 gap-3">
                   {stats.map((stat) => (
                     <div
@@ -255,14 +255,14 @@ export default async function ProfilePage() {
                     </span>
                   </div>
 
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     {BADGES.slice(0, 3).map((badge) => (
                       <span
                         key={badge.id}
                         className={
                           badge.unlocked
-                            ? "rounded-full border border-violet-300/30 bg-violet-500/15 px-2.5 py-1 text-xs text-violet-100"
-                            : "rounded-full border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-xs text-white/30"
+                            ? "rounded-full border border-violet-300/30 bg-violet-500/15 px-2 py-0.5 text-[11px] text-violet-100"
+                            : "rounded-full border border-white/[0.06] bg-white/[0.03] px-2 py-0.5 text-[11px] text-white/30"
                         }
                       >
                         {badge.name}
@@ -270,9 +270,8 @@ export default async function ProfilePage() {
                     ))}
                   </div>
 
-                  <p className="mt-3 text-xs leading-relaxed text-white/35">
-                    Unlock badges by ranking music, writing reviews and building
-                    your taste profile.
+                  <p className="mt-2 text-xs leading-relaxed text-white/35">
+                    Unlock badges by ranking music.
                   </p>
                 </Link>
               </div>
