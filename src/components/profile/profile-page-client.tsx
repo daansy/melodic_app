@@ -115,7 +115,7 @@ const USER_RANKS: Rank[] = [
     id: "album_scout_1",
     name: "Album Scout I",
     minPoints: 3000,
-    emblem: "▣",
+    emblem: "◧",
     colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
     emblemClasses: "border-emerald-300/20 bg-emerald-400/15 text-emerald-100",
     description: "You are actively scouting albums and projects.",
@@ -124,7 +124,7 @@ const USER_RANKS: Rank[] = [
     id: "album_scout_2",
     name: "Album Scout II",
     minPoints: 6000,
-    emblem: "▤",
+    emblem: "◨",
     colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
     emblemClasses: "border-emerald-300/20 bg-emerald-400/20 text-emerald-100",
     description: "Your catalog is getting wider.",
@@ -133,17 +133,17 @@ const USER_RANKS: Rank[] = [
     id: "album_scout_3",
     name: "Album Scout III",
     minPoints: 10000,
-    emblem: "▥",
+    emblem: "◩",
     colorClasses: "border-emerald-400/20 bg-emerald-500/10 text-emerald-100",
     emblemClasses: "border-emerald-300/20 bg-emerald-400/25 text-emerald-50",
-    description: "You are exploring with real intent.",
+    description: "You are exploring albums with real intent.",
   },
 
   {
     id: "catalog_curator_1",
     name: "Catalog Curator I",
     minPoints: 17500,
-    emblem: "▦",
+    emblem: "▥",
     colorClasses: "border-amber-400/20 bg-amber-500/10 text-amber-100",
     emblemClasses: "border-amber-300/20 bg-amber-400/15 text-amber-100",
     description: "Your profile is becoming a curated music catalog.",
@@ -227,10 +227,10 @@ const USER_RANKS: Rank[] = [
     id: "sonic_visionary_1",
     name: "Sonic Visionary I",
     minPoints: 600000,
-    emblem: "◐",
+    emblem: "◔",
     colorClasses: "border-indigo-400/20 bg-indigo-500/10 text-indigo-100",
     emblemClasses: "border-indigo-300/20 bg-indigo-400/15 text-indigo-100",
-    description: "You see patterns in music most listeners miss.",
+    description: "You start seeing patterns most listeners miss.",
   },
   {
     id: "sonic_visionary_2",
@@ -310,7 +310,6 @@ export function ProfilePageClient({
     BADGES.find((badge) => badge.id === profile.featuredBadgeId) ?? null;
 
   const unlockedBadges = BADGES.filter((badge) => badge.unlocked);
-
   const currentRank = useMemo(() => getCurrentRank(points), [points]);
   const nextRank = useMemo(() => getNextRank(points), [points]);
 
@@ -334,7 +333,10 @@ export function ProfilePageClient({
         </Link>
 
         <section className="mt-8 overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] shadow-2xl">
-          <div className="h-16 bg-violet-700/20 md:h-20" />
+          <div className="relative h-20 overflow-hidden bg-gradient-to-r from-violet-700/45 via-fuchsia-600/20 to-indigo-600/35 md:h-24">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.16),transparent_25%),radial-gradient(circle_at_75%_10%,rgba(168,85,247,0.25),transparent_28%)]" />
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0b0b14] to-transparent" />
+          </div>
 
           <div className="px-5 py-5 md:px-7">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -398,7 +400,7 @@ export function ProfilePageClient({
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_220px]">
+              <div className="grid grid-cols-2 gap-2 lg:grid-cols-[repeat(3,minmax(0,1fr))_200px]">
                 <div className="rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2 text-center">
                   <p className="text-[9px] uppercase tracking-wider text-white/35">
                     Albums
@@ -434,13 +436,13 @@ export function ProfilePageClient({
                   href="/profile/badges"
                   className="rounded-xl border border-white/[0.06] bg-black/20 px-3 py-2 transition hover:border-violet-400/30 hover:bg-violet-500/[0.06]"
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2">
                     <div>
                       <p className="text-[9px] uppercase tracking-wider text-white/35">
                         Badges
                       </p>
                       <p className="mt-0.5 text-sm font-semibold text-white">
-                        {unlockedBadges.length} unlocked
+                        {unlockedBadges.length} / {BADGES.length}
                       </p>
                     </div>
 
@@ -570,18 +572,17 @@ export function ProfilePageClient({
 
       {isRankModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm">
-          <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0b0b14] shadow-2xl">
-            <div className="flex items-start justify-between gap-4 border-b border-white/[0.06] px-5 py-5 md:px-6">
+          <div className="flex max-h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0b0b14] shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-white/[0.06] px-5 py-4 md:px-6">
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-violet-300/80">
                   Melodic ranks
                 </p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+                <h2 className="mt-1 text-2xl font-semibold tracking-tight text-white">
                   Point ranks
                 </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/45">
-                  Rank up by rating albums and tracks. Every tier has its own
-                  emblem, color and identity.
+                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-white/45">
+                  Rank up by rating albums and tracks.
                 </p>
               </div>
 
@@ -594,26 +595,26 @@ export function ProfilePageClient({
               </button>
             </div>
 
-            <div className="border-b border-white/[0.06] px-5 py-5 md:px-6">
+            <div className="border-b border-white/[0.06] px-5 py-4 md:px-6">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-4">
-                  <p className="text-[11px] uppercase tracking-wider text-white/35">
+                <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-white/35">
                     Current points
                   </p>
-                  <p className="mt-2 text-3xl font-semibold tabular-nums text-white">
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-white">
                     {points.toLocaleString()}
                   </p>
                 </div>
 
                 <div
-                  className={`rounded-2xl border p-4 ${currentRank.colorClasses}`}
+                  className={`rounded-2xl border p-3 ${currentRank.colorClasses}`}
                 >
-                  <p className="text-[11px] uppercase tracking-wider text-white/60">
+                  <p className="text-[10px] uppercase tracking-wider text-white/60">
                     Current rank
                   </p>
-                  <div className="mt-3 flex items-center gap-3">
+                  <div className="mt-2 flex items-center gap-3">
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-2xl border text-xl font-semibold ${currentRank.emblemClasses}`}
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl border text-lg font-semibold ${currentRank.emblemClasses}`}
                     >
                       {currentRank.emblem}
                     </div>
@@ -621,24 +622,24 @@ export function ProfilePageClient({
                       <p className="text-sm font-semibold text-white">
                         {currentRank.name}
                       </p>
-                      <p className="mt-1 text-xs text-white/65">
-                        {currentRank.description}
+                      <p className="mt-0.5 text-xs text-white/60">
+                        {currentRank.minPoints.toLocaleString()}+ points
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-4">
-                  <p className="text-[11px] uppercase tracking-wider text-white/35">
+                <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-white/35">
                     Next rank
                   </p>
 
                   {nextRank ? (
                     <>
-                      <p className="mt-2 text-sm font-semibold text-white">
+                      <p className="mt-1 text-sm font-semibold text-white">
                         {nextRank.name}
                       </p>
-                      <p className="mt-1 text-xs text-white/45">
+                      <p className="mt-0.5 text-xs text-white/45">
                         {Math.max(
                           nextRank.minPoints - points,
                           0
@@ -648,10 +649,10 @@ export function ProfilePageClient({
                     </>
                   ) : (
                     <>
-                      <p className="mt-2 text-sm font-semibold text-white">
+                      <p className="mt-1 text-sm font-semibold text-white">
                         Max rank reached
                       </p>
-                      <p className="mt-1 text-xs text-white/45">
+                      <p className="mt-0.5 text-xs text-white/45">
                         You are already at the top.
                       </p>
                     </>
@@ -660,8 +661,8 @@ export function ProfilePageClient({
               </div>
             </div>
 
-            <div className="overflow-y-auto px-5 py-5 md:px-6">
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="overflow-y-auto px-5 py-4 md:px-6">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
                 {USER_RANKS.map((rank) => {
                   const unlocked = points >= rank.minPoints;
                   const isCurrent = currentRank.id === rank.id;
@@ -669,7 +670,7 @@ export function ProfilePageClient({
                   return (
                     <div
                       key={rank.id}
-                      className={`rounded-2xl border p-4 transition ${
+                      className={`group rounded-2xl border p-3 transition duration-200 hover:-translate-y-0.5 hover:border-white/20 ${
                         isCurrent
                           ? `${rank.colorClasses} ring-1 ring-white/10`
                           : unlocked
@@ -677,9 +678,9 @@ export function ProfilePageClient({
                             : "border-white/[0.06] bg-white/[0.02] text-white/40"
                       }`}
                     >
-                      <div className="flex items-start gap-4">
+                      <div className="flex items-center gap-3">
                         <div
-                          className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border text-2xl font-semibold ${
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-xl font-semibold ${
                             unlocked
                               ? rank.emblemClasses
                               : "border-white/10 bg-white/[0.03] text-white/30"
@@ -689,32 +690,28 @@ export function ProfilePageClient({
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-sm font-semibold text-white">
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-sm font-semibold text-white">
                               {rank.name}
                             </p>
 
                             {isCurrent ? (
-                              <span className="rounded-full border border-white/10 bg-white/[0.08] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/75">
+                              <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.08] px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider text-white/75">
                                 Current
-                              </span>
-                            ) : null}
-
-                            {!unlocked ? (
-                              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/45">
-                                Locked
                               </span>
                             ) : null}
                           </div>
 
-                          <p className="mt-1 text-xs text-white/50">
+                          <p className="mt-0.5 text-xs text-white/45">
                             {rank.minPoints.toLocaleString()} points
                           </p>
-
-                          <p className="mt-2 text-sm leading-relaxed text-white/55">
-                            {rank.description}
-                          </p>
                         </div>
+                      </div>
+
+                      <div className="max-h-0 overflow-hidden opacity-0 transition-all duration-200 group-hover:mt-3 group-hover:max-h-20 group-hover:opacity-100">
+                        <p className="text-xs leading-relaxed text-white/55">
+                          {rank.description}
+                        </p>
                       </div>
                     </div>
                   );
