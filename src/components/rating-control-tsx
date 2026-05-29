@@ -5,7 +5,7 @@ import { rateItem, removeRating } from "@/app/actions/ratings";
 
 const MIN = 0;
 const MAX = 10;
-const STEP = 0.5;
+const STEP = 0.1;
 const DEFAULT_DRAFT = 7;
 
 type Props = {
