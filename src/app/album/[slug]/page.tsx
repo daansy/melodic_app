@@ -108,7 +108,7 @@ export default async function AlbumPage({
             </div>
           </div>
 
-          <div className="flex w-full flex-col items-start gap-3 sm:items-end sm:pt-14">
+          <div className="flex w-full flex-col items-start gap-3 sm:items-end sm:pt-4">
             <RatingControl
               variant="prominent"
               itemType="album"
@@ -146,7 +146,7 @@ export default async function AlbumPage({
           </div>
         </header>
 
-        <section className="mt-8 rounded-2xl border border-white/[0.08] bg-white/[0.02]">
+        <section className="mt-6 rounded-2xl border border-white/[0.08] bg-white/[0.02]">
           <ul className="divide-y divide-white/[0.05]">
             {album.tracks.map((track) => {
               const features = track.artists.filter(
