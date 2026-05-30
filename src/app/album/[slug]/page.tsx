@@ -123,13 +123,22 @@ export default async function AlbumPage({
 
             {myReviewText ? (
               <section className="w-full rounded-2xl border border-violet-300/15 bg-violet-500/[0.06] p-4 text-left">
-                <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-violet-200/70">
-                  Your review
-                </p>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-white/70">
-                  {myReviewText}
-                </p>
-                <p className="mt-3 text-xs text-white/35">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-violet-200/70">
+                    Your review
+                  </p>
+                  <p className="shrink-0 text-[10px] tabular-nums text-white/30">
+                    {myReviewText.length}/500
+                  </p>
+                </div>
+
+                <div className="mt-3 max-h-32 overflow-y-auto pr-1">
+                  <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-white/70">
+                    {myReviewText}
+                  </p>
+                </div>
+
+                <p className="mt-3 border-t border-white/[0.06] pt-3 text-xs text-white/35">
                   Edit from the rating button above.
                 </p>
               </section>
