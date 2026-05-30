@@ -57,7 +57,7 @@ export default async function AlbumPage({
         }}
       />
 
-      <div className="mx-auto w-full max-w-[900px] px-5 pb-24 pt-10 md:px-10">
+      <div className="mx-auto w-full max-w-[980px] px-5 pb-24 pt-10 md:px-10">
         <Link
           href={backHref}
           className="truncate text-sm font-medium text-white/60 transition hover:text-white"
@@ -65,7 +65,7 @@ export default async function AlbumPage({
           ← {backLabel}
         </Link>
 
-        <header className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <header className="mt-8 grid gap-6 sm:grid-cols-[minmax(0,1fr)_300px] sm:items-start">
           <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-end">
             <div className="h-44 w-44 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-2xl">
               {album.imageUrl ? (
@@ -108,7 +108,7 @@ export default async function AlbumPage({
             </div>
           </div>
 
-          <div className="shrink-0 sm:pb-1">
+          <div className="flex w-full flex-col items-start gap-3 sm:items-end sm:pt-14">
             <RatingControl
               variant="prominent"
               itemType="album"
@@ -120,40 +120,22 @@ export default async function AlbumPage({
               initialReviewText={albumRating?.reviewText ?? null}
               label={rateLabel}
             />
-          </div>
-        </header>
 
-        {myReviewText ? (
-          <section className="mt-8 rounded-2xl border border-violet-300/15 bg-violet-500/[0.06] p-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-violet-200/70">
+            {myReviewText ? (
+              <section className="w-full rounded-2xl border border-violet-300/15 bg-violet-500/[0.06] p-4 text-left">
+                <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-violet-200/70">
                   Your review
                 </p>
-                <h2 className="mt-1 text-lg font-semibold tracking-tight text-white">
-                  {album.name}
-                </h2>
-              </div>
-
-              {albumRating?.score !== undefined ? (
-                <div className="rounded-xl border border-violet-300/20 bg-black/20 px-3 py-2 text-sm font-semibold tabular-nums text-violet-100">
-                  {albumRating.score.toFixed(1)}
-                  <span className="ml-1 text-xs font-medium text-white/35">
-                    /10
-                  </span>
-                </div>
-              ) : null}
-            </div>
-
-            <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-white/70">
-              {myReviewText}
-            </p>
-
-            <p className="mt-4 text-xs text-white/35">
-              Edit this from the rating button above.
-            </p>
-          </section>
-        ) : null}
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-white/70">
+                  {myReviewText}
+                </p>
+                <p className="mt-3 text-xs text-white/35">
+                  Edit from the rating button above.
+                </p>
+              </section>
+            ) : null}
+          </div>
+        </header>
 
         <section className="mt-8 rounded-2xl border border-white/[0.08] bg-white/[0.02]">
           <ul className="divide-y divide-white/[0.05]">
@@ -190,7 +172,7 @@ export default async function AlbumPage({
                     ) : null}
                   </div>
 
-                  <span className="shrink-0 text-xs tabular-nums text-white/35">
+                  <span className="w-10 shrink-0 text-right text-xs tabular-nums text-white/35">
                     {formatDuration(track.durationMs)}
                   </span>
 

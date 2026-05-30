@@ -96,6 +96,7 @@ export function TrackRatingSlider({
     }
 
     const parsed = Number(value);
+
     if (!Number.isNaN(parsed)) {
       setDraft(clampScore(parsed));
     }
@@ -120,7 +121,7 @@ export function TrackRatingSlider({
   }
 
   return (
-    <div className="flex shrink-0 items-center gap-2">
+    <div className="grid w-[184px] shrink-0 grid-cols-[2.5rem_minmax(0,1fr)_1.5rem] items-center gap-2">
       <input
         type="text"
         inputMode="decimal"
@@ -138,37 +139,37 @@ export function TrackRatingSlider({
         style={{ color: showColor ? scoreColor(draft) : undefined }}
       />
 
-      <div className="w-14 transition-[width] duration-200 ease-out group-hover:w-36 focus-within:w-36">
-        <input
-          type="range"
-          min={MIN_SCORE}
-          max={MAX_SCORE}
-          step={STEP}
-          value={draft}
-          disabled={isPending}
-          aria-label={`Rate ${itemName}`}
-          onChange={(e) => onSlider(Number(e.target.value))}
-          onPointerUp={(e) =>
-            commit(Number((e.target as HTMLInputElement).value))
-          }
-          onKeyUp={(e) => commit(Number((e.target as HTMLInputElement).value))}
-          className={SLIDER_CLASSES}
-          style={{ background: SCORE_TRACK_GRADIENT }}
-        />
-      </div>
+      <input
+        type="range"
+        min={MIN_SCORE}
+        max={MAX_SCORE}
+        step={STEP}
+        value={draft}
+        disabled={isPending}
+        aria-label={`Rate ${itemName}`}
+        onChange={(e) => onSlider(Number(e.target.value))}
+        onPointerUp={(e) =>
+          commit(Number((e.target as HTMLInputElement).value))
+        }
+        onKeyUp={(e) => commit(Number((e.target as HTMLInputElement).value))}
+        className={SLIDER_CLASSES}
+        style={{ background: SCORE_TRACK_GRADIENT }}
+      />
 
-      {rated ? (
-        <button
-          type="button"
-          onClick={removeTrackRating}
-          disabled={isPending}
-          aria-label={`Remove rating for ${itemName}`}
-          title="Remove rating"
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-xs font-medium text-white/35 opacity-0 transition hover:border-red-300/30 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-40 group-hover:opacity-100 focus:opacity-100"
-        >
-          ×
-        </button>
-      ) : null}
+      <div className="flex h-6 w-6 items-center justify-center">
+        {rated ? (
+          <button
+            type="button"
+            onClick={removeTrackRating}
+            disabled={isPending}
+            aria-label={`Remove rating for ${itemName}`}
+            title="Remove rating"
+            className="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-xs font-medium text-white/35 opacity-0 transition hover:border-red-300/30 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-40 group-hover:opacity-100 focus:opacity-100"
+          >
+            ×
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
