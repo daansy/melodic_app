@@ -44,6 +44,8 @@ export default async function AlbumPage({
       : Promise.resolve({} as Record<string, number>),
   ]);
 
+  const myReviewText = albumRating?.reviewText?.trim() || "";
+
   return (
     <main className="min-h-screen bg-[#05050d] text-white">
       <div
@@ -120,6 +122,38 @@ export default async function AlbumPage({
             />
           </div>
         </header>
+
+        {myReviewText ? (
+          <section className="mt-8 rounded-2xl border border-violet-300/15 bg-violet-500/[0.06] p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-violet-200/70">
+                  Your review
+                </p>
+                <h2 className="mt-1 text-lg font-semibold tracking-tight text-white">
+                  {album.name}
+                </h2>
+              </div>
+
+              {albumRating?.score !== undefined ? (
+                <div className="rounded-xl border border-violet-300/20 bg-black/20 px-3 py-2 text-sm font-semibold tabular-nums text-violet-100">
+                  {albumRating.score.toFixed(1)}
+                  <span className="ml-1 text-xs font-medium text-white/35">
+                    /10
+                  </span>
+                </div>
+              ) : null}
+            </div>
+
+            <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-white/70">
+              {myReviewText}
+            </p>
+
+            <p className="mt-4 text-xs text-white/35">
+              Edit this from the rating button above.
+            </p>
+          </section>
+        ) : null}
 
         <section className="mt-8 rounded-2xl border border-white/[0.08] bg-white/[0.02]">
           <ul className="divide-y divide-white/[0.05]">
